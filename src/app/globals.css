@@ -1,26 +1,188 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Midtown Design System — Vintage Restaurant */
+  --bg-primary: #FAFAF8;
+  --bg-secondary: #F0EDE6;
+  --text-primary: #1A1A1A;
+  --text-secondary: #6B6B6B;
+  --accent: #D4553A;
+  --accent-hover: #B8432C;
+  --success: #2D8A4E;
+  --warning: #E8A317;
+  --danger: #D32F2F;
+  --border: #E0DCD4;
+
+  /* shadcn compatibility */
+  --background: 250 249 248;
+  --foreground: 26 26 26;
+  --card: 255 255 255;
+  --card-foreground: 26 26 26;
+  --popover: 255 255 255;
+  --popover-foreground: 26 26 26;
+  --primary: 212 85 58;
+  --primary-foreground: 255 255 255;
+  --secondary: 240 237 230;
+  --secondary-foreground: 26 26 26;
+  --muted: 240 237 230;
+  --muted-foreground: 107 107 107;
+  --accent: 240 237 230;
+  --accent-foreground: 26 26 26;
+  --destructive: 211 47 47;
+  --destructive-foreground: 255 255 255;
+  --border: 224 220 212;
+  --input: 224 220 212;
+  --ring: 212 85 58;
+  --radius: 0.5rem;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: "IBM Plex Sans", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Smooth transitions */
+button,
+a,
+input,
+select,
+textarea {
+  transition: all 0.15s ease;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
+
+/* Menu card hover */
+.menu-card {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.menu-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.menu-card:active {
+  transform: translateY(0);
+}
+
+/* Tap highlight for mobile */
+.tap-highlight {
+  -webkit-tap-highlight-color: rgba(212, 85, 58, 0.1);
+}
+
+/* Price number style */
+.price-text {
+  font-family: "IBM Plex Mono", monospace;
+  font-weight: 600;
+}
+
+/* Admin sidebar */
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  transition: all 0.15s ease;
+}
+
+.sidebar-link:hover {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.sidebar-link.active {
+  background-color: #FEF1ED;
+  color: var(--accent);
+}
+
+/* Status badges */
+.badge-pending {
+  background-color: #FEF3C7;
+  color: #92400E;
+}
+
+.badge-confirmed {
+  background-color: #DBEAFE;
+  color: #1E40AF;
+}
+
+.badge-completed {
+  background-color: #D1FAE5;
+  color: #065F46;
+}
+
+.badge-cancelled {
+  background-color: #FEE2E2;
+  color: #991B1B;
+}
+
+/* Cart item animation */
+@keyframes slideInRight {
+  from {
+    transform: translateX(20px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.cart-item-enter {
+  animation: slideInRight 0.2s ease;
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  .print-receipt {
+    width: 80mm;
+    font-family: monospace;
+    font-size: 12px;
+  }
 }
