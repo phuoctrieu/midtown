@@ -9,7 +9,6 @@ import {
     TrendingDown,
     Wallet,
     Plus,
-    Trash2,
     BookOpen,
     ChevronDown,
     Zap,
@@ -34,37 +33,17 @@ interface CashTransaction {
     created_at: string
 }
 
-// ─── Date filter helpers ────────────────────────────────────────────────────────
-
-function getDateRange(filter: string, customFrom: string, customTo: string): { from: string; to: string } {
-    const today = getTodayVN()
-    if (filter === 'today') return { from: today, to: today }
-    if (filter === '7d') {
-        const d = new Date(); d.setDate(d.getDate() - 6)
-        return { from: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`, to: today }
-    }
-    if (filter === '30d') {
-        const d = new Date(); d.setDate(d.getDate() - 29)
-        return { from: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`, to: today }
-    }
-    return { from: customFrom, to: customTo }
-}
-
-// POS revenue grouped by date  { '2026-03-07': 12345000, ... }
-type PosByDate = Record<string, number>
 
 // ─── Component ─────────────────────────────────────────────────────────────────
 
-export default function CashbookPage() {
+export default function StaffCashbookPage() {
     const supabase = createClient()
     const queryClient = useQueryClient()
     const today = getTodayVN()
 
-    // Date filter state
-    const [filter, setFilter] = useState<'today' | '7d' | '30d' | 'custom'>('today')
-    const [customFrom, setCustomFrom] = useState(today)
-    const [customTo, setCustomTo] = useState(today)
-    const { from, to } = getDateRange(filter, customFrom, customTo)
+    // Always show today only
+    const from = today
+    const to = today
 
     // Form state
     const [form, setForm] = useState({
@@ -79,9 +58,9 @@ export default function CashbookPage() {
 
     // ── Queries ─────────────────────────────────────────────────────────────────
 
-    // Manual transactions from cash_transactions table (Admin can see auto-synced POS revenue here too)
+    // Manual transactions from cash_transactions table
     const { data: transactions = [], isLoading } = useQuery<CashTransaction[]>({
-        queryKey: ['cash_transactions', from, to],
+        queryKey: ['staff_cash_transactions', from, to],
         queryFn: async () => {
             const { data, error } = await supabase
                 .from('cash_transactions')
@@ -103,7 +82,6 @@ export default function CashbookPage() {
 
     // Retrieve the auto-synced POS amount just for UI display highlight
     const totalPosRevenue = transactions.filter(t => t.category === 'Bán hàng POS').reduce((s, t) => s + t.amount, 0)
-
 
     // Expense by category
     const expenseByCategory = EXPENSE_CATEGORIES.map(cat => ({
@@ -132,29 +110,21 @@ export default function CashbookPage() {
         onSuccess: () => {
             toast.success('Đã lưu giao dịch')
             setForm(prev => ({ ...prev, amount: '', description: '' }))
-            queryClient.invalidateQueries({ queryKey: ['cash_transactions'] })
+            queryClient.invalidateQueries({ queryKey: ['staff_cash_transactions'] })
+            queryClient.invalidateQueries({ queryKey: ['cash_transactions'] }) // clear admin cache too
         },
         onError: (e: Error) => toast.error(e.message || 'Lỗi khi lưu'),
     })
 
-    const deleteMutation = useMutation({
-        mutationFn: async (id: string) => {
-            const { error } = await supabase.from('cash_transactions').delete().eq('id', id)
-            if (error) throw error
-        },
-        onSuccess: () => {
-            toast.success('Đã xóa')
-            queryClient.invalidateQueries({ queryKey: ['cash_transactions'] })
-        },
-        onError: () => toast.error('Lỗi khi xóa'),
-    })
+    // Staff cannot delete transactions!
+    // Removed deleteMutation
 
     const ledgerCount = transactions.length
 
     // ── Render ───────────────────────────────────────────────────────────────────
 
     return (
-        <div className="max-w-5xl mx-auto space-y-6">
+        <div className="max-w-5xl mx-auto space-y-6 p-4 md:p-6 lg:p-8">
 
             {/* Header */}
             <div>
@@ -170,33 +140,15 @@ export default function CashbookPage() {
                 </p>
             </div>
 
-            {/* Date Filter Tabs */}
-            <div className="flex flex-wrap items-center gap-2">
-                {(['today', '7d', '30d', 'custom'] as const).map(f => (
-                    <button
-                        key={f}
-                        onClick={() => setFilter(f)}
-                        className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${filter === f
-                            ? 'bg-[#DC2626] text-white shadow-sm'
-                            : 'bg-white border border-[#E2E8F0] text-[#64748B] hover:border-[#DC2626] hover:text-[#DC2626]'
-                            }`}
-                    >
-                        {f === 'today' ? 'Hôm nay' : f === '7d' ? '7 ngày' : f === '30d' ? '30 ngày' : 'Tuỳ chọn'}
-                    </button>
-                ))}
-                {filter === 'custom' && (
-                    <div className="flex items-center gap-2 bg-white border border-[#E2E8F0] rounded-xl px-3 py-1.5 shadow-sm">
-                        <input type="date" value={customFrom} onChange={e => setCustomFrom(e.target.value)}
-                            className="text-sm bg-transparent border-none focus:ring-0 text-[#0F172A]" />
-                        <span className="text-[#64748B]">–</span>
-                        <input type="date" value={customTo} onChange={e => setCustomTo(e.target.value)}
-                            className="text-sm bg-transparent border-none focus:ring-0 text-[#0F172A]" />
-                    </div>
-                )}
+            {/* Date indicator */}
+            <div className="flex items-center gap-2">
+                <span className="px-4 py-1.5 rounded-full text-sm font-medium bg-[#DC2626] text-white shadow-sm">
+                    Hôm nay
+                </span>
             </div>
 
             {/* Summary Cards */}
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="bg-white rounded-xl border border-[#E2E8F0] p-4 shadow-sm">
                     <div className="flex items-center gap-2 mb-3">
                         <div className="w-9 h-9 bg-green-50 rounded-xl flex items-center justify-center">
@@ -368,7 +320,6 @@ export default function CashbookPage() {
                                             <th className="text-left px-4 py-3 text-xs font-semibold text-[#64748B] uppercase tracking-wide">Danh mục</th>
                                             <th className="text-left px-4 py-3 text-xs font-semibold text-[#64748B] uppercase tracking-wide hidden sm:table-cell">Nội dung</th>
                                             <th className="text-right px-4 py-3 text-xs font-semibold text-[#64748B] uppercase tracking-wide">Số tiền</th>
-                                            <th className="px-4 py-3 w-10"></th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-[#E2E8F0]">
@@ -402,16 +353,6 @@ export default function CashbookPage() {
                                                     </td>
                                                     <td className={`px-4 py-3 text-right text-sm font-bold price-text ${tx.type === 'income' ? 'text-green-700' : 'text-red-600'}`}>
                                                         {tx.type === 'income' ? '+' : '-'}{formatVND(tx.amount)}
-                                                    </td>
-                                                    <td className="px-4 py-3 text-right">
-                                                        {!isAutoPos && (
-                                                            <button
-                                                                onClick={() => { if (confirm('Xoá giao dịch này?')) deleteMutation.mutate(tx.id) }}
-                                                                className="p-1.5 text-[#C0BDB5] hover:text-red-500 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
-                                                            >
-                                                                <Trash2 className="w-3.5 h-3.5" />
-                                                            </button>
-                                                        )}
                                                     </td>
                                                 </tr>
                                             )

@@ -619,6 +619,7 @@ export type CartItem = {
     quantity: number
     note?: string
     imageUrl?: string | null
+    orderItemId?: string
 }
 
 export type CartState = {

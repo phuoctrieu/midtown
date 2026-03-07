@@ -88,7 +88,7 @@ export default function DashboardPage() {
     ]
 
     const statCards = [
-        { label: 'Doanh thu hôm nay', value: formatVND(totalRevenue), icon: TrendingUp, color: '#D4553A', bg: '#FEF1ED' },
+        { label: 'Doanh thu hôm nay', value: formatVND(totalRevenue), icon: TrendingUp, color: '#DC2626', bg: '#FEF2F2' },
         { label: 'Số hóa đơn', value: `${orderCount} đơn`, icon: ShoppingBag, color: '#1E40AF', bg: '#EFF6FF' },
         { label: 'Tiền mặt', value: formatVND(cashAmount), icon: Banknote, color: '#2D8A4E', bg: '#ECFDF5' },
         { label: 'Chuyển khoản', value: formatVND(transferAmount), icon: CreditCard, color: '#7C3AED', bg: '#F5F3FF' },
@@ -97,8 +97,8 @@ export default function DashboardPage() {
     return (
         <div className="max-w-6xl mx-auto space-y-6">
             <div>
-                <h1 className="text-2xl font-bold text-[#1A1A1A]">📊 Dashboard</h1>
-                <p className="text-sm text-[#6B6B6B] mt-1">Hôm nay: {today}</p>
+                <h1 className="text-2xl font-bold text-[#0F172A]">📊 Dashboard</h1>
+                <p className="text-sm text-[#64748B] mt-1">Hôm nay: {today}</p>
             </div>
 
             {/* Stats Cards */}
@@ -106,14 +106,14 @@ export default function DashboardPage() {
                 {statCards.map((card) => {
                     const Icon = card.icon
                     return (
-                        <div key={card.label} className="bg-white rounded-xl border border-[#E0DCD4] p-4 shadow-sm">
+                        <div key={card.label} className="bg-white rounded-xl border border-[#E2E8F0] p-4 shadow-sm">
                             <div className="flex items-center gap-3 mb-3">
                                 <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: card.bg }}>
                                     <Icon className="w-4 h-4" style={{ color: card.color }} />
                                 </div>
-                                <span className="text-xs text-[#6B6B6B] font-medium">{card.label}</span>
+                                <span className="text-xs text-[#64748B] font-medium">{card.label}</span>
                             </div>
-                            <p className="price-text text-xl font-bold text-[#1A1A1A]">{card.value}</p>
+                            <p className="price-text text-xl font-bold text-[#0F172A]">{card.value}</p>
                         </div>
                     )
                 })}
@@ -122,38 +122,38 @@ export default function DashboardPage() {
             {/* Date filter */}
             <div className="flex items-center gap-3 flex-wrap">
                 <div className="flex items-center gap-2">
-                    <label className="text-sm text-[#6B6B6B]">Từ:</label>
+                    <label className="text-sm text-[#64748B]">Từ:</label>
                     <input type="date" value={fromDate} onChange={e => setFromDate(e.target.value)}
-                        className="border border-[#E0DCD4] rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-[#D4553A]" />
+                        className="border border-[#E2E8F0] rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-[#DC2626]" />
                 </div>
                 <div className="flex items-center gap-2">
-                    <label className="text-sm text-[#6B6B6B]">Đến:</label>
+                    <label className="text-sm text-[#64748B]">Đến:</label>
                     <input type="date" value={toDate} onChange={e => setToDate(e.target.value)}
-                        className="border border-[#E0DCD4] rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-[#D4553A]" />
+                        className="border border-[#E2E8F0] rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-[#DC2626]" />
                 </div>
             </div>
 
             {/* Charts Row */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                 {/* Revenue bar chart */}
-                <div className="lg:col-span-2 bg-white rounded-xl border border-[#E0DCD4] p-5 shadow-sm">
-                    <h2 className="font-semibold text-[#1A1A1A] mb-4">Doanh thu theo ngày</h2>
+                <div className="lg:col-span-2 bg-white rounded-xl border border-[#E2E8F0] p-5 shadow-sm">
+                    <h2 className="font-semibold text-[#0F172A] mb-4">Doanh thu theo ngày</h2>
                     <ResponsiveContainer width="100%" height={220}>
                         <BarChart data={dailyRevenue}>
-                            <XAxis dataKey="date" tick={{ fontSize: 12, fill: '#6B6B6B' }} />
-                            <YAxis tick={{ fontSize: 12, fill: '#6B6B6B' }} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
+                            <XAxis dataKey="date" tick={{ fontSize: 12, fill: '#64748B' }} />
+                            <YAxis tick={{ fontSize: 12, fill: '#64748B' }} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
                             <Tooltip
                                 formatter={(v: number | string | undefined) => [formatVND(Number(v || 0)), 'Doanh thu']}
-                                contentStyle={{ borderRadius: 8, border: '1px solid #E0DCD4', fontSize: 13 }}
+                                contentStyle={{ borderRadius: 8, border: '1px solid #E2E8F0', fontSize: 13 }}
                             />
-                            <Bar dataKey="revenue" fill="#D4553A" radius={[4, 4, 0, 0]} />
+                            <Bar dataKey="revenue" fill="#DC2626" radius={[4, 4, 0, 0]} />
                         </BarChart>
                     </ResponsiveContainer>
                 </div>
 
                 {/* Payment pie chart */}
-                <div className="bg-white rounded-xl border border-[#E0DCD4] p-5 shadow-sm">
-                    <h2 className="font-semibold text-[#1A1A1A] mb-4">Phương thức TT</h2>
+                <div className="bg-white rounded-xl border border-[#E2E8F0] p-5 shadow-sm">
+                    <h2 className="font-semibold text-[#0F172A] mb-4">Phương thức TT</h2>
                     {totalRevenue > 0 ? (
                         <ResponsiveContainer width="100%" height={220}>
                             <PieChart>
@@ -162,12 +162,12 @@ export default function DashboardPage() {
                                         <Cell key={entry.name} fill={entry.color} />
                                     ))}
                                 </Pie>
-                                <Legend formatter={(val) => <span style={{ fontSize: 12, color: '#6B6B6B' }}>{val}</span>} />
+                                <Legend formatter={(val) => <span style={{ fontSize: 12, color: '#64748B' }}>{val}</span>} />
                                 <Tooltip formatter={(v: number | string | undefined) => formatVND(Number(v || 0))} />
                             </PieChart>
                         </ResponsiveContainer>
                     ) : (
-                        <div className="h-48 flex items-center justify-center text-[#6B6B6B] text-sm">Chưa có dữ liệu</div>
+                        <div className="h-48 flex items-center justify-center text-[#64748B] text-sm">Chưa có dữ liệu</div>
                     )}
                 </div>
             </div>
@@ -175,23 +175,23 @@ export default function DashboardPage() {
             {/* Staff Revenue + Cancelled */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {/* Staff revenue */}
-                <div className="bg-white rounded-xl border border-[#E0DCD4] p-5 shadow-sm">
-                    <h2 className="font-semibold text-[#1A1A1A] mb-4">Doanh thu theo nhân viên</h2>
+                <div className="bg-white rounded-xl border border-[#E2E8F0] p-5 shadow-sm">
+                    <h2 className="font-semibold text-[#0F172A] mb-4">Doanh thu theo nhân viên</h2>
                     {staffRevenue.length === 0 ? (
-                        <p className="text-sm text-[#6B6B6B] py-8 text-center">Chưa có dữ liệu</p>
+                        <p className="text-sm text-[#64748B] py-8 text-center">Chưa có dữ liệu</p>
                     ) : (
                         <div className="space-y-3">
                             {staffRevenue.map((s: { staff_id: string; staff_name: string; total_revenue: number; order_count: number }) => (
                                 <div key={s.staff_id} className="flex items-center gap-3">
-                                    <div className="w-7 h-7 bg-[#F0EDE6] rounded-full flex items-center justify-center text-xs font-bold text-[#D4553A]">
+                                    <div className="w-7 h-7 bg-[#EEF2F7] rounded-full flex items-center justify-center text-xs font-bold text-[#DC2626]">
                                         {s.staff_name?.charAt(0) || 'N'}
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <div className="flex justify-between text-sm">
-                                            <span className="font-medium text-[#1A1A1A] truncate">{s.staff_name}</span>
-                                            <span className="price-text text-[#D4553A] font-semibold flex-shrink-0 ml-2">{formatVND(Number(s.total_revenue))}</span>
+                                            <span className="font-medium text-[#0F172A] truncate">{s.staff_name}</span>
+                                            <span className="price-text text-[#DC2626] font-semibold flex-shrink-0 ml-2">{formatVND(Number(s.total_revenue))}</span>
                                         </div>
-                                        <div className="text-xs text-[#6B6B6B]">{s.order_count} đơn</div>
+                                        <div className="text-xs text-[#64748B]">{s.order_count} đơn</div>
                                     </div>
                                 </div>
                             ))}
@@ -200,19 +200,19 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Cancelled orders */}
-                <div className="bg-white rounded-xl border border-[#E0DCD4] p-5 shadow-sm">
-                    <h2 className="font-semibold text-[#1A1A1A] mb-4">Hóa đơn đã hủy gần đây</h2>
+                <div className="bg-white rounded-xl border border-[#E2E8F0] p-5 shadow-sm">
+                    <h2 className="font-semibold text-[#0F172A] mb-4">Hóa đơn đã hủy gần đây</h2>
                     {cancelledOrders.length === 0 ? (
-                        <p className="text-sm text-[#6B6B6B] py-8 text-center">Không có hóa đơn hủy</p>
+                        <p className="text-sm text-[#64748B] py-8 text-center">Không có hóa đơn hủy</p>
                     ) : (
                         <div className="space-y-3">
                             {cancelledOrders.map((o: { id: string; order_number: number; profiles?: { full_name: string }; cancelled_at?: string; cancel_reason: string }) => (
                                 <div key={o.id} className="p-3 bg-red-50 rounded-lg border border-red-100">
                                     <div className="flex justify-between text-sm">
-                                        <span className="font-medium text-[#1A1A1A]">#{o.order_number}</span>
-                                        <span className="text-[#6B6B6B] text-xs">{o.cancelled_at ? formatDateTime(o.cancelled_at) : ''}</span>
+                                        <span className="font-medium text-[#0F172A]">#{o.order_number}</span>
+                                        <span className="text-[#64748B] text-xs">{o.cancelled_at ? formatDateTime(o.cancelled_at) : ''}</span>
                                     </div>
-                                    <div className="text-xs text-[#6B6B6B] mt-1">NV: {o.profiles?.full_name || 'N/A'}</div>
+                                    <div className="text-xs text-[#64748B] mt-1">NV: {o.profiles?.full_name || 'N/A'}</div>
                                     <div className="text-xs text-[#D32F2F] mt-1 italic">Lý do: {o.cancel_reason}</div>
                                 </div>
                             ))}

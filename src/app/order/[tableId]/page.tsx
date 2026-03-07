@@ -143,10 +143,10 @@ export default function QROrderPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-[#F0EDE6] flex items-center justify-center">
+            <div className="min-h-screen bg-[#EEF2F7] flex items-center justify-center">
                 <div className="text-center">
-                    <div className="w-12 h-12 border-4 border-[#D4553A] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-                    <p className="text-[#6B6B6B] text-sm">Đang tải menu...</p>
+                    <div className="w-12 h-12 border-4 border-[#DC2626] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                    <p className="text-[#64748B] text-sm">Đang tải menu...</p>
                 </div>
             </div>
         )
@@ -154,11 +154,11 @@ export default function QROrderPage() {
 
     if (error) {
         return (
-            <div className="min-h-screen bg-[#F0EDE6] flex items-center justify-center p-4">
+            <div className="min-h-screen bg-[#EEF2F7] flex items-center justify-center p-4">
                 <div className="bg-white rounded-2xl p-8 text-center max-w-sm shadow-xl">
                     <div className="text-5xl mb-4">❌</div>
-                    <h1 className="font-bold text-[#1A1A1A] mb-2">Không tìm thấy bàn</h1>
-                    <p className="text-[#6B6B6B] text-sm">{error}</p>
+                    <h1 className="font-bold text-[#0F172A] mb-2">Không tìm thấy bàn</h1>
+                    <p className="text-[#64748B] text-sm">{error}</p>
                 </div>
             </div>
         )
@@ -166,14 +166,14 @@ export default function QROrderPage() {
 
     if (orderDone) {
         return (
-            <div className="min-h-screen bg-[#F0EDE6] flex items-center justify-center p-4">
+            <div className="min-h-screen bg-[#EEF2F7] flex items-center justify-center p-4">
                 <div className="bg-white rounded-2xl p-8 text-center max-w-sm shadow-xl">
                     <CheckCircle className="w-16 h-16 text-[#2D8A4E] mx-auto mb-4" />
-                    <h1 className="font-bold text-xl text-[#1A1A1A] mb-2">Đã gửi order!</h1>
-                    <p className="text-[#6B6B6B] text-sm mb-1">Nhà hàng đang xác nhận đơn của bạn.</p>
-                    <p className="text-[#6B6B6B] text-sm mb-6">Bàn: <strong>{table?.name || `Bàn ${table?.table_number}`}</strong></p>
+                    <h1 className="font-bold text-xl text-[#0F172A] mb-2">Đã gửi order!</h1>
+                    <p className="text-[#64748B] text-sm mb-1">Nhà hàng đang xác nhận đơn của bạn.</p>
+                    <p className="text-[#64748B] text-sm mb-6">Bàn: <strong>{table?.name || `Bàn ${table?.table_number}`}</strong></p>
                     <button onClick={() => setOrderDone(false)}
-                        className="w-full bg-[#D4553A] text-white rounded-xl py-3 font-medium hover:bg-[#B8432C]">
+                        className="w-full bg-[#DC2626] text-white rounded-xl py-3 font-medium hover:bg-[#B91C1C]">
                         Order thêm
                     </button>
                 </div>
@@ -182,18 +182,18 @@ export default function QROrderPage() {
     }
 
     return (
-        <div className="min-h-screen bg-[#FAFAF8]">
+        <div className="min-h-screen bg-[#F8FAFC]">
             {/* Header */}
-            <div className="sticky top-0 bg-white border-b border-[#E0DCD4] px-4 py-3 z-10 shadow-sm">
+            <div className="sticky top-0 bg-white border-b border-[#E2E8F0] px-4 py-3 z-10 shadow-sm">
                 <div className="flex items-center justify-between max-w-2xl mx-auto">
                     <div>
-                        <h1 className="font-bold text-[#1A1A1A]">Midtown Restaurant</h1>
-                        <p className="text-xs text-[#6B6B6B]">{table?.name || `Bàn ${table?.table_number}`}</p>
+                        <h1 className="font-bold text-[#0F172A]">Midtown Restaurant</h1>
+                        <p className="text-xs text-[#64748B]">{table?.name || `Bàn ${table?.table_number}`}</p>
                     </div>
                     <button onClick={() => setShowCart(true)} className="relative p-2">
-                        <ShoppingCart className="w-6 h-6 text-[#1A1A1A]" />
+                        <ShoppingCart className="w-6 h-6 text-[#0F172A]" />
                         {cartCount > 0 && (
-                            <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-[#D4553A] text-white text-xs rounded-full flex items-center justify-center font-bold">
+                            <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-[#DC2626] text-white text-xs rounded-full flex items-center justify-center font-bold">
                                 {cartCount}
                             </span>
                         )}
@@ -202,15 +202,15 @@ export default function QROrderPage() {
             </div>
 
             {/* Category tabs */}
-            <div className="sticky top-[57px] bg-white border-b border-[#E0DCD4] z-10">
+            <div className="sticky top-[57px] bg-white border-b border-[#E2E8F0] z-10">
                 <div className="flex gap-2 overflow-x-auto px-4 py-2 max-w-2xl mx-auto">
                     <button onClick={() => setSelectedCat(null)}
-                        className={`flex-shrink-0 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${!selectedCat ? 'bg-[#D4553A] text-white' : 'text-[#6B6B6B] hover:text-[#D4553A]'}`}>
+                        className={`flex-shrink-0 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${!selectedCat ? 'bg-[#DC2626] text-white' : 'text-[#64748B] hover:text-[#DC2626]'}`}>
                         Tất cả
                     </button>
                     {categories.map(cat => (
                         <button key={cat.id} onClick={() => setSelectedCat(cat.id)}
-                            className={`flex-shrink-0 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${selectedCat === cat.id ? 'bg-[#D4553A] text-white' : 'text-[#6B6B6B] hover:text-[#D4553A]'}`}>
+                            className={`flex-shrink-0 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${selectedCat === cat.id ? 'bg-[#DC2626] text-white' : 'text-[#64748B] hover:text-[#DC2626]'}`}>
                             {cat.name}
                         </button>
                     ))}
@@ -222,8 +222,8 @@ export default function QROrderPage() {
                 {filteredItems.map(item => {
                     const qty = getCartQty(item.id)
                     return (
-                        <div key={item.id} className="bg-white rounded-xl border border-[#E0DCD4] overflow-hidden shadow-sm">
-                            <div className="relative h-28 bg-[#F0EDE6]">
+                        <div key={item.id} className="bg-white rounded-xl border border-[#E2E8F0] overflow-hidden shadow-sm">
+                            <div className="relative h-28 bg-[#EEF2F7]">
                                 {item.image_url ? (
                                     <Image src={item.image_url} alt={item.name} fill className="object-cover" sizes="50vw" />
                                 ) : (
@@ -231,23 +231,23 @@ export default function QROrderPage() {
                                 )}
                             </div>
                             <div className="p-3">
-                                <p className="text-sm font-medium text-[#1A1A1A] mb-0.5 line-clamp-2">{item.name}</p>
-                                <p className="price-text text-[#D4553A] text-sm font-semibold">{formatNumber(item.price)}₫</p>
+                                <p className="text-sm font-medium text-[#0F172A] mb-0.5 line-clamp-2">{item.name}</p>
+                                <p className="price-text text-[#DC2626] text-sm font-semibold">{formatNumber(item.price)}₫</p>
                                 <div className="flex items-center justify-end mt-2">
                                     {qty === 0 ? (
                                         <button onClick={() => addToCart(item)}
-                                            className="flex items-center gap-1 bg-[#D4553A] text-white text-xs px-3 py-1.5 rounded-full hover:bg-[#B8432C] transition-colors">
+                                            className="flex items-center gap-1 bg-[#DC2626] text-white text-xs px-3 py-1.5 rounded-full hover:bg-[#B91C1C] transition-colors">
                                             <Plus className="w-3 h-3" /> Thêm
                                         </button>
                                     ) : (
                                         <div className="flex items-center gap-2">
                                             <button onClick={() => updateQty(item.id, -1)}
-                                                className="w-7 h-7 rounded-full border border-[#E0DCD4] flex items-center justify-center hover:border-[#D4553A] transition-colors">
+                                                className="w-7 h-7 rounded-full border border-[#E2E8F0] flex items-center justify-center hover:border-[#DC2626] transition-colors">
                                                 <Minus className="w-3 h-3" />
                                             </button>
-                                            <span className="text-sm font-bold text-[#D4553A] w-4 text-center">{qty}</span>
+                                            <span className="text-sm font-bold text-[#DC2626] w-4 text-center">{qty}</span>
                                             <button onClick={() => updateQty(item.id, 1)}
-                                                className="w-7 h-7 rounded-full bg-[#D4553A] flex items-center justify-center hover:bg-[#B8432C] transition-colors">
+                                                className="w-7 h-7 rounded-full bg-[#DC2626] flex items-center justify-center hover:bg-[#B91C1C] transition-colors">
                                                 <Plus className="w-3 h-3 text-white" />
                                             </button>
                                         </div>
@@ -261,10 +261,10 @@ export default function QROrderPage() {
 
             {/* Fixed cart button */}
             {cart.length > 0 && (
-                <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-[#E0DCD4] z-10">
+                <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-[#E2E8F0] z-10">
                     <div className="max-w-2xl mx-auto">
                         <button onClick={() => setShowCart(true)}
-                            className="w-full bg-[#D4553A] text-white rounded-xl py-3.5 font-semibold flex items-center justify-between px-5 hover:bg-[#B8432C] transition-colors">
+                            className="w-full bg-[#DC2626] text-white rounded-xl py-3.5 font-semibold flex items-center justify-between px-5 hover:bg-[#B91C1C] transition-colors">
                             <span className="bg-white/20 text-white text-sm px-2 py-0.5 rounded-full">{cartCount}</span>
                             <span>Xem giỏ hàng</span>
                             <span className="price-text">{formatVND(cartTotal)}</span>
@@ -277,11 +277,11 @@ export default function QROrderPage() {
             {showCart && (
                 <div className="fixed inset-0 bg-black/50 z-50 flex items-end">
                     <div className="bg-white rounded-t-2xl w-full max-h-[80vh] overflow-y-auto">
-                        <div className="sticky top-0 bg-white flex items-center justify-between px-5 py-4 border-b border-[#E0DCD4]">
-                            <button onClick={() => setShowCart(false)} className="flex items-center gap-1.5 text-[#6B6B6B]">
+                        <div className="sticky top-0 bg-white flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0]">
+                            <button onClick={() => setShowCart(false)} className="flex items-center gap-1.5 text-[#64748B]">
                                 <ChevronLeft className="w-4 h-4" /> Tiếp tục chọn
                             </button>
-                            <h2 className="font-semibold text-[#1A1A1A]">Giỏ hàng ({cartCount})</h2>
+                            <h2 className="font-semibold text-[#0F172A]">Giỏ hàng ({cartCount})</h2>
                             <div className="w-20" />
                         </div>
 
@@ -289,17 +289,17 @@ export default function QROrderPage() {
                             {cart.map(item => (
                                 <div key={item.id} className="flex items-center gap-3">
                                     <div className="flex-1">
-                                        <p className="text-sm font-medium text-[#1A1A1A]">{item.name}</p>
-                                        <p className="price-text text-xs text-[#D4553A]">{formatNumber(item.price)}₫/món</p>
+                                        <p className="text-sm font-medium text-[#0F172A]">{item.name}</p>
+                                        <p className="price-text text-xs text-[#DC2626]">{formatNumber(item.price)}₫/món</p>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <button onClick={() => updateQty(item.id, -1)}
-                                            className="w-7 h-7 rounded-full border border-[#E0DCD4] flex items-center justify-center">
+                                            className="w-7 h-7 rounded-full border border-[#E2E8F0] flex items-center justify-center">
                                             <Minus className="w-3 h-3" />
                                         </button>
                                         <span className="text-sm font-bold w-4 text-center">{item.quantity}</span>
                                         <button onClick={() => updateQty(item.id, 1)}
-                                            className="w-7 h-7 rounded-full bg-[#D4553A] flex items-center justify-center">
+                                            className="w-7 h-7 rounded-full bg-[#DC2626] flex items-center justify-center">
                                             <Plus className="w-3 h-3 text-white" />
                                         </button>
                                     </div>
@@ -308,19 +308,19 @@ export default function QROrderPage() {
                             ))}
                         </div>
 
-                        <div className="border-t border-[#E0DCD4] p-5">
+                        <div className="border-t border-[#E2E8F0] p-5">
                             <div className="flex justify-between items-center mb-4">
-                                <span className="text-[#6B6B6B]">Tổng cộng</span>
-                                <span className="price-text text-xl font-bold text-[#D4553A]">{formatVND(cartTotal)}</span>
+                                <span className="text-[#64748B]">Tổng cộng</span>
+                                <span className="price-text text-xl font-bold text-[#DC2626]">{formatVND(cartTotal)}</span>
                             </div>
                             <button
                                 onClick={submitOrder}
                                 disabled={submitting}
-                                className="w-full bg-[#D4553A] text-white rounded-xl py-4 font-bold text-base hover:bg-[#B8432C] transition-colors disabled:opacity-60"
+                                className="w-full bg-[#DC2626] text-white rounded-xl py-4 font-bold text-base hover:bg-[#B91C1C] transition-colors disabled:opacity-60"
                             >
                                 {submitting ? 'Đang gửi...' : '🚀 Gửi order'}
                             </button>
-                            <p className="text-xs text-center text-[#6B6B6B] mt-3">
+                            <p className="text-xs text-center text-[#64748B] mt-3">
                                 Nhân viên sẽ xác nhận và phục vụ tại {table?.name || `Bàn ${table?.table_number}`}
                             </p>
                         </div>

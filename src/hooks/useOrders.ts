@@ -150,9 +150,11 @@ export function useAddOrderItem() {
                     .update({ quantity: existing.quantity + quantity })
                     .eq('id', existing.id)
                 if (error) throw error
+                await recalculateOrderTotal(supabase, orderId)
+                return { orderItemId: existing.id }
             } else {
                 // Insert new item
-                const { error } = await supabase
+                const { data: inserted, error } = await supabase
                     .from('order_items')
                     .insert({
                         order_id: orderId,
@@ -161,11 +163,12 @@ export function useAddOrderItem() {
                         unit_price: unitPrice,
                         note: note || null,
                     })
+                    .select('id')
+                    .single()
                 if (error) throw error
+                await recalculateOrderTotal(supabase, orderId)
+                return { orderItemId: inserted.id }
             }
-
-            // Recalculate order totals
-            await recalculateOrderTotal(supabase, orderId)
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['active_orders'] })
@@ -182,31 +185,51 @@ export function useUpdateOrderItem() {
 
     return useMutation({
         mutationFn: async ({
-            orderItemId,
             orderId,
+            menuItemId,
             quantity,
         }: {
-            orderItemId: string
             orderId: string
+            menuItemId: string
             quantity: number
         }) => {
             if (quantity <= 0) {
                 const { error } = await supabase
                     .from('order_items')
                     .delete()
-                    .eq('id', orderItemId)
+                    .eq('order_id', orderId)
+                    .eq('menu_item_id', menuItemId)
                 if (error) throw error
             } else {
                 const { error } = await supabase
                     .from('order_items')
                     .update({ quantity })
-                    .eq('id', orderItemId)
+                    .eq('order_id', orderId)
+                    .eq('menu_item_id', menuItemId)
                 if (error) throw error
             }
 
             await recalculateOrderTotal(supabase, orderId)
         },
-        onSuccess: () => {
+        onSuccess: (_, { orderId, menuItemId, quantity }) => {
+            // Update cache immediately so the sync effect doesn't see stale data
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            queryClient.setQueryData<any[]>(['active_orders'], (old) => {
+                if (!old) return old
+                return old.map(order => {
+                    if (order.id !== orderId) return order
+                    return {
+                        ...order,
+                        order_items: quantity <= 0
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                            ? order.order_items?.filter((oi: any) => oi.menu_item_id !== menuItemId) ?? []
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                            : order.order_items?.map((oi: any) =>
+                                oi.menu_item_id === menuItemId ? { ...oi, quantity } : oi
+                            ) ?? [],
+                    }
+                })
+            })
             queryClient.invalidateQueries({ queryKey: ['active_orders'] })
         },
     })
@@ -221,21 +244,35 @@ export function useRemoveOrderItem() {
 
     return useMutation({
         mutationFn: async ({
-            orderItemId,
             orderId,
+            menuItemId,
         }: {
-            orderItemId: string
             orderId: string
+            menuItemId: string
         }) => {
             const { error } = await supabase
                 .from('order_items')
                 .delete()
-                .eq('id', orderItemId)
+                .eq('order_id', orderId)
+                .eq('menu_item_id', menuItemId)
             if (error) throw error
 
             await recalculateOrderTotal(supabase, orderId)
         },
-        onSuccess: () => {
+        onSuccess: (_, { orderId, menuItemId }) => {
+            // Update cache immediately so the sync effect doesn't see stale data
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            queryClient.setQueryData<any[]>(['active_orders'], (old) => {
+                if (!old) return old
+                return old.map(order => {
+                    if (order.id !== orderId) return order
+                    return {
+                        ...order,
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        order_items: order.order_items?.filter((oi: any) => oi.menu_item_id !== menuItemId) ?? [],
+                    }
+                })
+            })
             queryClient.invalidateQueries({ queryKey: ['active_orders'] })
         },
     })

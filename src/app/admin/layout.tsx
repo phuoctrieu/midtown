@@ -21,7 +21,7 @@ export default async function AdminLayout({
     if (profile?.role !== 'admin') redirect('/pos')
 
     return (
-        <div className="min-h-screen bg-[#FAFAF8]">
+        <div className="min-h-screen bg-[#F8FAFC]">
             <AdminSidebar staffName={profile?.full_name || user.email || 'Admin'} />
             <main className="md:ml-64 p-4 md:p-6 pt-20 md:pt-6 min-h-screen">
                 {children}

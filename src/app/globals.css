@@ -4,38 +4,40 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Midtown Design System — Vintage Restaurant */
-  --bg-primary: #FAFAF8;
-  --bg-secondary: #F0EDE6;
-  --text-primary: #1A1A1A;
-  --text-secondary: #6B6B6B;
-  --accent: #D4553A;
-  --accent-hover: #B8432C;
-  --success: #2D8A4E;
-  --warning: #E8A317;
-  --danger: #D32F2F;
-  --border: #E0DCD4;
+  /* Midtown Design System — Red & Navy */
+  --bg-primary: #F8FAFC;
+  --bg-secondary: #EEF2F7;
+  --text-primary: #0F172A;
+  --text-secondary: #64748B;
+  --accent: #DC2626;
+  --accent-hover: #B91C1C;
+  --navy: #1B2A4A;
+  --navy-light: #243B5E;
+  --success: #16A34A;
+  --warning: #D97706;
+  --danger: #DC2626;
+  --border: #E2E8F0;
 
   /* shadcn compatibility */
-  --background: 250 249 248;
-  --foreground: 26 26 26;
+  --background: 248 250 252;
+  --foreground: 15 23 42;
   --card: 255 255 255;
-  --card-foreground: 26 26 26;
+  --card-foreground: 15 23 42;
   --popover: 255 255 255;
-  --popover-foreground: 26 26 26;
-  --primary: 212 85 58;
+  --popover-foreground: 15 23 42;
+  --primary: 220 38 38;
   --primary-foreground: 255 255 255;
-  --secondary: 240 237 230;
-  --secondary-foreground: 26 26 26;
-  --muted: 240 237 230;
-  --muted-foreground: 107 107 107;
-  --accent: 240 237 230;
-  --accent-foreground: 26 26 26;
-  --destructive: 211 47 47;
+  --secondary: 238 242 247;
+  --secondary-foreground: 15 23 42;
+  --muted: 238 242 247;
+  --muted-foreground: 100 116 139;
+  --accent: 238 242 247;
+  --accent-foreground: 15 23 42;
+  --destructive: 220 38 38;
   --destructive-foreground: 255 255 255;
-  --border: 224 220 212;
-  --input: 224 220 212;
-  --ring: 212 85 58;
+  --border: 226 232 240;
+  --input: 226 232 240;
+  --ring: 220 38 38;
   --radius: 0.5rem;
 }
 
@@ -105,7 +107,7 @@ textarea {
 
 /* Tap highlight for mobile */
 .tap-highlight {
-  -webkit-tap-highlight-color: rgba(212, 85, 58, 0.1);
+  -webkit-tap-highlight-color: rgba(220, 38, 38, 0.1);
 }
 
 /* Price number style */
@@ -114,27 +116,6 @@ textarea {
   font-weight: 600;
 }
 
-/* Admin sidebar */
-.sidebar-link {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 16px;
-  border-radius: 8px;
-  color: var(--text-secondary);
-  font-weight: 500;
-  transition: all 0.15s ease;
-}
-
-.sidebar-link:hover {
-  background-color: var(--bg-secondary);
-  color: var(--text-primary);
-}
-
-.sidebar-link.active {
-  background-color: #FEF1ED;
-  color: var(--accent);
-}
 
 /* Status badges */
 .badge-pending {

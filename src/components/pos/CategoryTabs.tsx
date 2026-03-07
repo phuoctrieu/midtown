@@ -14,8 +14,8 @@ export function CategoryTabs({ categories, selected, onSelect }: CategoryTabsPro
             <button
                 onClick={() => onSelect(null)}
                 className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all ${selected === null
-                    ? 'bg-[#D4553A] text-white shadow-sm'
-                    : 'bg-white text-[#6B6B6B] border border-[#E0DCD4] hover:border-[#D4553A] hover:text-[#D4553A]'
+                    ? 'bg-[#DC2626] text-white shadow-sm'
+                    : 'bg-white text-[#64748B] border border-[#E2E8F0] hover:border-[#DC2626] hover:text-[#DC2626]'
                     }`}
             >
                 Tất cả
@@ -25,8 +25,8 @@ export function CategoryTabs({ categories, selected, onSelect }: CategoryTabsPro
                     key={cat.id}
                     onClick={() => onSelect(cat.id)}
                     className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all ${selected === cat.id
-                        ? 'bg-[#D4553A] text-white shadow-sm'
-                        : 'bg-white text-[#6B6B6B] border border-[#E0DCD4] hover:border-[#D4553A] hover:text-[#D4553A]'
+                        ? 'bg-[#DC2626] text-white shadow-sm'
+                        : 'bg-white text-[#64748B] border border-[#E2E8F0] hover:border-[#DC2626] hover:text-[#DC2626]'
                         }`}
                 >
                     {cat.name}

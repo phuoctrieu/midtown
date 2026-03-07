@@ -34,18 +34,18 @@ interface ItemStats {
 function InfoTooltip({ text }: { text: string }) {
     return (
         <span className="relative group inline-flex items-center ml-1 align-middle">
-            <Info className="w-3.5 h-3.5 text-[#9B9B9B] cursor-pointer hover:text-[#6B6B6B] transition-colors" />
+            <Info className="w-3.5 h-3.5 text-[#9B9B9B] cursor-pointer hover:text-[#64748B] transition-colors" />
             <span
                 className="
                     pointer-events-none absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2
-                    w-56 px-3 py-2 rounded-lg bg-[#1A1A1A] text-white text-xs leading-relaxed
+                    w-56 px-3 py-2 rounded-lg bg-[#0F172A] text-white text-xs leading-relaxed
                     shadow-xl invisible opacity-0 group-hover:visible group-hover:opacity-100
                     transition-all duration-200
                 "
             >
                 {text}
                 {/* arrow */}
-                <span className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-[#1A1A1A]" />
+                <span className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-[#0F172A]" />
             </span>
         </span>
     )
@@ -62,7 +62,7 @@ function fcColor(pct: number) {
 }
 
 function fcBgBadge(pct: number) {
-    if (pct <= 0) return 'bg-[#F0EDE6] text-[#6B6B6B]'
+    if (pct <= 0) return 'bg-[#EEF2F7] text-[#64748B]'
     if (pct > 50) return 'bg-red-100 text-red-700'
     if (pct > 40) return 'bg-amber-100 text-amber-700'
     return 'bg-green-100 text-green-700'
@@ -77,7 +77,7 @@ function marginColor(pct: number) {
 }
 
 function marginBgBadge(pct: number) {
-    if (pct <= 0) return 'bg-[#F0EDE6] text-[#6B6B6B]'
+    if (pct <= 0) return 'bg-[#EEF2F7] text-[#64748B]'
     if (pct < 30) return 'bg-red-100 text-red-700'
     if (pct < 45) return 'bg-amber-100 text-amber-700'
     return 'bg-green-100 text-green-700'
@@ -239,22 +239,22 @@ export default function FoodcostPage() {
             {/* Header */}
             <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-[#1A1A1A]">📊 Báo cáo Foodcost & Lợi Nhuận</h1>
-                    <p className="text-sm text-[#6B6B6B] mt-1">Phân tích giá vốn, lợi nhuận gộp và hiệu quả từng món ăn</p>
+                    <h1 className="text-2xl font-bold text-[#0F172A]">📊 Báo cáo Foodcost & Lợi Nhuận</h1>
+                    <p className="text-sm text-[#64748B] mt-1">Phân tích giá vốn, lợi nhuận gộp và hiệu quả từng món ăn</p>
                 </div>
-                <div className="flex gap-2 bg-white border border-[#E0DCD4] rounded-xl p-1 shadow-sm">
+                <div className="flex gap-2 bg-white border border-[#E2E8F0] rounded-xl p-1 shadow-sm">
                     <input
                         type="date"
                         value={dateRange.from}
                         onChange={e => setDateRange(prev => ({ ...prev, from: e.target.value }))}
-                        className="px-3 py-1.5 text-sm bg-transparent border-none focus:ring-0 text-[#1A1A1A]"
+                        className="px-3 py-1.5 text-sm bg-transparent border-none focus:ring-0 text-[#0F172A]"
                     />
-                    <span className="text-[#6B6B6B] self-center">–</span>
+                    <span className="text-[#64748B] self-center">–</span>
                     <input
                         type="date"
                         value={dateRange.to}
                         onChange={e => setDateRange(prev => ({ ...prev, to: e.target.value }))}
-                        className="px-3 py-1.5 text-sm bg-transparent border-none focus:ring-0 text-[#1A1A1A]"
+                        className="px-3 py-1.5 text-sm bg-transparent border-none focus:ring-0 text-[#0F172A]"
                     />
                 </div>
             </div>
@@ -262,18 +262,18 @@ export default function FoodcostPage() {
             {/* 5 Summary Cards */}
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
                 {cards.map(card => (
-                    <div key={card.label} className="bg-white rounded-xl border border-[#E0DCD4] p-4 shadow-sm hover:shadow-md transition-shadow">
+                    <div key={card.label} className="bg-white rounded-xl border border-[#E2E8F0] p-4 shadow-sm hover:shadow-md transition-shadow">
                         <div className="flex items-center gap-2 mb-3">
                             <div className={`w-8 h-8 rounded-lg ${card.iconBg} flex items-center justify-center ${card.iconColor} shrink-0`}>
                                 {card.icon}
                             </div>
-                            <span className="text-xs font-medium text-[#6B6B6B] leading-tight">
+                            <span className="text-xs font-medium text-[#64748B] leading-tight">
                                 {card.label}
                                 <InfoTooltip text={card.tooltip} />
                             </span>
                         </div>
                         {isLoading ? (
-                            <div className="h-7 bg-[#F0EDE6] rounded animate-pulse w-3/4" />
+                            <div className="h-7 bg-[#EEF2F7] rounded animate-pulse w-3/4" />
                         ) : (
                             <p className={`text-xl font-bold ${card.valueColor} truncate`}>{card.value}</p>
                         )}
@@ -321,14 +321,14 @@ export default function FoodcostPage() {
             )}
 
             {/* Per-item detail table */}
-            <div className="bg-white rounded-xl border border-[#E0DCD4] shadow-sm overflow-hidden">
-                <div className="px-5 py-4 border-b border-[#E0DCD4] flex items-center justify-between">
+            <div className="bg-white rounded-xl border border-[#E2E8F0] shadow-sm overflow-hidden">
+                <div className="px-5 py-4 border-b border-[#E2E8F0] flex items-center justify-between">
                     <div>
-                        <h3 className="font-semibold text-[#1A1A1A]">Chi tiết phân tích lợi nhuận theo món</h3>
+                        <h3 className="font-semibold text-[#0F172A]">Chi tiết phân tích lợi nhuận theo món</h3>
                         <p className="text-xs text-[#9B9B9B] mt-0.5">Sắp xếp theo Contribution (đóng góp lợi nhuận cao → thấp)</p>
                     </div>
                     {!isLoading && itemStats.length > 0 && (
-                        <span className="text-xs text-[#6B6B6B] bg-[#FAFAF8] px-3 py-1 rounded-full border border-[#E0DCD4]">
+                        <span className="text-xs text-[#64748B] bg-[#F8FAFC] px-3 py-1 rounded-full border border-[#E2E8F0]">
                             {itemStats.length} món
                         </span>
                     )}
@@ -336,53 +336,53 @@ export default function FoodcostPage() {
 
                 <div className="overflow-x-auto">
                     <table className="w-full min-w-[780px]">
-                        <thead className="bg-[#FAFAF8] border-b border-[#E0DCD4]">
+                        <thead className="bg-[#F8FAFC] border-b border-[#E2E8F0]">
                             <tr>
-                                <th className="text-left px-4 py-3 text-xs font-semibold text-[#6B6B6B] uppercase tracking-wide">Món</th>
-                                <th className="text-center px-4 py-3 text-xs font-semibold text-[#6B6B6B] uppercase tracking-wide">
+                                <th className="text-left px-4 py-3 text-xs font-semibold text-[#64748B] uppercase tracking-wide">Món</th>
+                                <th className="text-center px-4 py-3 text-xs font-semibold text-[#64748B] uppercase tracking-wide">
                                     SL Bán
                                     <InfoTooltip text="Số lượng đã bán trong kỳ chọn." />
                                 </th>
-                                <th className="text-right px-4 py-3 text-xs font-semibold text-[#6B6B6B] uppercase tracking-wide">
+                                <th className="text-right px-4 py-3 text-xs font-semibold text-[#64748B] uppercase tracking-wide">
                                     Doanh Thu
                                     <InfoTooltip text="Tổng tiền bán ra (giá bán × số lượng) của món này." />
                                 </th>
-                                <th className="text-right px-4 py-3 text-xs font-semibold text-[#6B6B6B] uppercase tracking-wide">
+                                <th className="text-right px-4 py-3 text-xs font-semibold text-[#64748B] uppercase tracking-wide">
                                     COGS
                                     <InfoTooltip text="Tổng giá vốn nguyên liệu (giá nhập × số lượng) của món này." />
                                 </th>
-                                <th className="text-right px-4 py-3 text-xs font-semibold text-[#6B6B6B] uppercase tracking-wide">
+                                <th className="text-right px-4 py-3 text-xs font-semibold text-[#64748B] uppercase tracking-wide">
                                     Foodcost %
                                     <InfoTooltip text="Tỷ lệ chi phí nguyên liệu so với doanh thu. Foodcost tốt trong nhà hàng thường từ 30% đến 40%." />
                                 </th>
-                                <th className="text-right px-4 py-3 text-xs font-semibold text-[#6B6B6B] uppercase tracking-wide">
+                                <th className="text-right px-4 py-3 text-xs font-semibold text-[#64748B] uppercase tracking-wide">
                                     Gross Profit
                                     <InfoTooltip text="Lợi nhuận gộp = Doanh thu − Giá vốn. Tiền còn lại sau khi trừ chi phí nguyên liệu." />
                                 </th>
-                                <th className="text-right px-4 py-3 text-xs font-semibold text-[#6B6B6B] uppercase tracking-wide">
+                                <th className="text-right px-4 py-3 text-xs font-semibold text-[#64748B] uppercase tracking-wide">
                                     Profit Margin
                                     <InfoTooltip text="Tỷ suất lợi nhuận = Lợi nhuận gộp ÷ Doanh thu. Cho biết % doanh thu nhà hàng giữ lại sau giá vốn." />
                                 </th>
-                                <th className="text-right px-4 py-3 text-xs font-semibold text-[#6B6B6B] uppercase tracking-wide">
+                                <th className="text-right px-4 py-3 text-xs font-semibold text-[#64748B] uppercase tracking-wide">
                                     Contribution
                                     <InfoTooltip text="Tổng lợi nhuận mà món ăn đóng góp = Số lượng × Lợi nhuận gộp mỗi phần. Món bán nhiều và lợi nhuận cao sẽ có Contribution lớn." />
                                 </th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-[#E0DCD4]">
+                        <tbody className="divide-y divide-[#E2E8F0]">
                             {isLoading ? (
                                 [...Array(4)].map((_, i) => (
                                     <tr key={i}>
                                         <td colSpan={8} className="px-4 py-4">
-                                            <div className="h-4 bg-[#F0EDE6] rounded animate-pulse w-full" />
+                                            <div className="h-4 bg-[#EEF2F7] rounded animate-pulse w-full" />
                                         </td>
                                     </tr>
                                 ))
                             ) : itemStats.length === 0 ? (
                                 <tr>
                                     <td colSpan={8} className="text-center py-16">
-                                        <PackageOpen className="w-12 h-12 text-[#E0DCD4] mx-auto mb-3" />
-                                        <p className="text-[#6B6B6B] text-sm font-medium">Không có dữ liệu bán hàng trong thời gian này</p>
+                                        <PackageOpen className="w-12 h-12 text-[#E2E8F0] mx-auto mb-3" />
+                                        <p className="text-[#64748B] text-sm font-medium">Không có dữ liệu bán hàng trong thời gian này</p>
                                         <p className="text-[#9B9B9B] text-xs mt-1">Chọn khoảng thời gian khác hoặc kiểm tra lại dữ liệu</p>
                                     </td>
                                 </tr>
@@ -390,20 +390,20 @@ export default function FoodcostPage() {
                                 itemStats.map((item, idx) => {
                                     const fcPct = item.revenue > 0 ? (item.cogs / item.revenue) * 100 : 0
                                     return (
-                                        <tr key={item.id} className="hover:bg-[#FAFAF8] transition-colors group">
+                                        <tr key={item.id} className="hover:bg-[#F8FAFC] transition-colors group">
                                             {/* Rank + name */}
                                             <td className="px-4 py-3.5">
                                                 <div className="flex items-center gap-2">
                                                     <span className="text-xs text-[#C0BDB5] font-mono w-5 text-right shrink-0">
                                                         {idx + 1}
                                                     </span>
-                                                    <p className="text-sm font-medium text-[#1A1A1A]">{item.name}</p>
+                                                    <p className="text-sm font-medium text-[#0F172A]">{item.name}</p>
                                                 </div>
                                             </td>
 
                                             {/* Qty */}
                                             <td className="px-4 py-3.5 text-center">
-                                                <span className="inline-flex items-center justify-center bg-[#F0EDE6] text-[#1A1A1A] text-xs font-semibold rounded-full px-2.5 py-0.5 min-w-[32px]">
+                                                <span className="inline-flex items-center justify-center bg-[#EEF2F7] text-[#0F172A] text-xs font-semibold rounded-full px-2.5 py-0.5 min-w-[32px]">
                                                     {item.quantity}
                                                 </span>
                                             </td>
@@ -465,9 +465,9 @@ export default function FoodcostPage() {
 
                         {/* Footer totals row */}
                         {!isLoading && itemStats.length > 0 && (
-                            <tfoot className="bg-[#FAFAF8] border-t-2 border-[#E0DCD4]">
+                            <tfoot className="bg-[#F8FAFC] border-t-2 border-[#E2E8F0]">
                                 <tr>
-                                    <td colSpan={2} className="px-4 py-3.5 text-sm font-bold text-[#1A1A1A]">
+                                    <td colSpan={2} className="px-4 py-3.5 text-sm font-bold text-[#0F172A]">
                                         Tổng cộng
                                     </td>
                                     <td className="px-4 py-3.5 text-right text-sm font-bold text-blue-700">
@@ -496,69 +496,69 @@ export default function FoodcostPage() {
             </div>
 
             {/* Legend / Glossary */}
-            <div className="bg-[#FAFAF8] rounded-xl border border-[#E0DCD4] px-5 py-5">
-                <p className="text-xs font-semibold text-[#6B6B6B] uppercase tracking-wide mb-4">📖 Giải thích các chỉ số</p>
+            <div className="bg-[#F8FAFC] rounded-xl border border-[#E2E8F0] px-5 py-5">
+                <p className="text-xs font-semibold text-[#64748B] uppercase tracking-wide mb-4">📖 Giải thích các chỉ số</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
 
                     {/* Foodcost % */}
-                    <div className="bg-white rounded-lg border border-[#E0DCD4] p-4 space-y-2">
+                    <div className="bg-white rounded-lg border border-[#E2E8F0] p-4 space-y-2">
                         <p className="text-sm font-bold text-purple-700">Foodcost %</p>
-                        <p className="text-xs text-[#6B6B6B]"><span className="font-semibold">Công thức:</span> COGS ÷ Doanh thu</p>
-                        <p className="text-xs text-[#6B6B6B]">Tỷ lệ chi phí nguyên liệu so với doanh thu. Chỉ số này cho biết mỗi 100.000₫ bán ra thì tốn bao nhiêu tiền nguyên liệu.</p>
+                        <p className="text-xs text-[#64748B]"><span className="font-semibold">Công thức:</span> COGS ÷ Doanh thu</p>
+                        <p className="text-xs text-[#64748B]">Tỷ lệ chi phí nguyên liệu so với doanh thu. Chỉ số này cho biết mỗi 100.000₫ bán ra thì tốn bao nhiêu tiền nguyên liệu.</p>
                         <div className="text-xs space-y-1 pt-1">
                             <p className="font-semibold text-[#4B4B4B]">Ngưỡng chuẩn ngành nhà hàng:</p>
                             <p><span className="inline-block w-2.5 h-2.5 rounded-full bg-green-500 mr-1.5 align-middle"></span><strong>30–40%</strong> → Mức lý tưởng ✅</p>
                             <p><span className="inline-block w-2.5 h-2.5 rounded-full bg-amber-400 mr-1.5 align-middle"></span><strong>40–50%</strong> → Cần theo dõi ⚠️</p>
                             <p><span className="inline-block w-2.5 h-2.5 rounded-full bg-red-500 mr-1.5 align-middle"></span><strong>&gt;50%</strong> → Nguy hiểm 🚨</p>
                         </div>
-                        <p className="text-xs bg-[#FAFAF8] rounded px-2 py-1.5 text-[#6B6B6B] border border-[#E0DCD4]">
+                        <p className="text-xs bg-[#F8FAFC] rounded px-2 py-1.5 text-[#64748B] border border-[#E2E8F0]">
                             <span className="font-semibold">Ví dụ:</span> Bán món 100.000₫, COGS = 40.000₫ → Foodcost = 40%
                         </p>
                     </div>
 
                     {/* Gross Profit */}
-                    <div className="bg-white rounded-lg border border-[#E0DCD4] p-4 space-y-2">
+                    <div className="bg-white rounded-lg border border-[#E2E8F0] p-4 space-y-2">
                         <p className="text-sm font-bold text-green-700">Gross Profit (Lợi nhuận gộp)</p>
-                        <p className="text-xs text-[#6B6B6B]"><span className="font-semibold">Công thức:</span> Doanh thu − COGS</p>
-                        <p className="text-xs text-[#6B6B6B]">Số tiền còn lại sau khi trừ chi phí nguyên liệu. Đây là khoản nhà hàng dùng để chi trả:</p>
-                        <ul className="text-xs text-[#6B6B6B] list-disc list-inside space-y-0.5 pl-1">
+                        <p className="text-xs text-[#64748B]"><span className="font-semibold">Công thức:</span> Doanh thu − COGS</p>
+                        <p className="text-xs text-[#64748B]">Số tiền còn lại sau khi trừ chi phí nguyên liệu. Đây là khoản nhà hàng dùng để chi trả:</p>
+                        <ul className="text-xs text-[#64748B] list-disc list-inside space-y-0.5 pl-1">
                             <li>Lương nhân viên</li>
                             <li>Tiền thuê mặt bằng</li>
                             <li>Điện, nước, gas</li>
                             <li>Lợi nhuận của chủ nhà hàng</li>
                         </ul>
-                        <p className="text-xs bg-[#FAFAF8] rounded px-2 py-1.5 text-[#6B6B6B] border border-[#E0DCD4]">
+                        <p className="text-xs bg-[#F8FAFC] rounded px-2 py-1.5 text-[#64748B] border border-[#E2E8F0]">
                             <span className="font-semibold">Ví dụ:</span> Doanh thu 10.000.000₫, COGS 4.000.000₫ → Gross Profit = 6.000.000₫
                         </p>
                     </div>
 
                     {/* Profit Margin */}
-                    <div className="bg-white rounded-lg border border-[#E0DCD4] p-4 space-y-2">
+                    <div className="bg-white rounded-lg border border-[#E2E8F0] p-4 space-y-2">
                         <p className="text-sm font-bold text-indigo-700">Profit Margin % (Tỷ suất lợi nhuận)</p>
-                        <p className="text-xs text-[#6B6B6B]"><span className="font-semibold">Công thức:</span> Gross Profit ÷ Doanh thu</p>
-                        <p className="text-xs text-[#6B6B6B]">Cho biết mỗi 100.000₫ doanh thu thì nhà hàng giữ lại được bao nhiêu sau khi trừ giá vốn nguyên liệu.</p>
+                        <p className="text-xs text-[#64748B]"><span className="font-semibold">Công thức:</span> Gross Profit ÷ Doanh thu</p>
+                        <p className="text-xs text-[#64748B]">Cho biết mỗi 100.000₫ doanh thu thì nhà hàng giữ lại được bao nhiêu sau khi trừ giá vốn nguyên liệu.</p>
                         <div className="text-xs space-y-1 pt-1">
                             <p className="font-semibold text-[#4B4B4B]">Ngưỡng đánh giá:</p>
                             <p><span className="inline-block w-2.5 h-2.5 rounded-full bg-green-500 mr-1.5 align-middle"></span><strong>&gt;45%</strong> → Lợi nhuận tốt ✅</p>
                             <p><span className="inline-block w-2.5 h-2.5 rounded-full bg-amber-400 mr-1.5 align-middle"></span><strong>30–45%</strong> → Trung bình ⚠️</p>
                             <p><span className="inline-block w-2.5 h-2.5 rounded-full bg-red-500 mr-1.5 align-middle"></span><strong>&lt;30%</strong> → Lợi nhuận thấp 🔴</p>
                         </div>
-                        <p className="text-xs bg-[#FAFAF8] rounded px-2 py-1.5 text-[#6B6B6B] border border-[#E0DCD4]">
+                        <p className="text-xs bg-[#F8FAFC] rounded px-2 py-1.5 text-[#64748B] border border-[#E2E8F0]">
                             <span className="font-semibold">Ví dụ:</span> Margin 40% → bán 100.000₫ còn lại 40.000₫
                         </p>
                     </div>
 
                     {/* Contribution */}
-                    <div className="bg-white rounded-lg border border-[#E0DCD4] p-4 space-y-2">
+                    <div className="bg-white rounded-lg border border-[#E2E8F0] p-4 space-y-2">
                         <p className="text-sm font-bold text-indigo-700">Contribution (Đóng góp lợi nhuận)</p>
-                        <p className="text-xs text-[#6B6B6B]"><span className="font-semibold">Công thức:</span> Số lượng bán × Lợi nhuận gộp mỗi phần</p>
-                        <p className="text-xs text-[#6B6B6B]">Tổng số tiền mà một món ăn đóng góp vào lợi nhuận của nhà hàng trong khoảng thời gian được chọn.</p>
-                        <p className="text-xs text-[#6B6B6B]">Món có Contribution cao thường do:</p>
-                        <ul className="text-xs text-[#6B6B6B] list-disc list-inside space-y-0.5 pl-1">
+                        <p className="text-xs text-[#64748B]"><span className="font-semibold">Công thức:</span> Số lượng bán × Lợi nhuận gộp mỗi phần</p>
+                        <p className="text-xs text-[#64748B]">Tổng số tiền mà một món ăn đóng góp vào lợi nhuận của nhà hàng trong khoảng thời gian được chọn.</p>
+                        <p className="text-xs text-[#64748B]">Món có Contribution cao thường do:</p>
+                        <ul className="text-xs text-[#64748B] list-disc list-inside space-y-0.5 pl-1">
                             <li>Bán được số lượng nhiều</li>
                             <li>Hoặc có lợi nhuận gộp cao trên mỗi phần</li>
                         </ul>
-                        <p className="text-xs bg-[#FAFAF8] rounded px-2 py-1.5 text-[#6B6B6B] border border-[#E0DCD4]">
+                        <p className="text-xs bg-[#F8FAFC] rounded px-2 py-1.5 text-[#64748B] border border-[#E2E8F0]">
                             <span className="font-semibold">Tip:</span> Đây là món nên <strong>đẩy bán</strong> vì mang lại nhiều tiền nhất cho nhà hàng.
                         </p>
                     </div>

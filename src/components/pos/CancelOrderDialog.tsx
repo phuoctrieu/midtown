@@ -27,8 +27,8 @@ export function CancelOrderDialog({ onConfirm, onClose, isLoading }: CancelOrder
                             </svg>
                         </div>
                         <div>
-                            <h3 className="font-semibold text-[#1A1A1A]">Hủy hóa đơn</h3>
-                            <p className="text-xs text-[#6B6B6B]">Nhập lý do để xác nhận hủy</p>
+                            <h3 className="font-semibold text-[#0F172A]">Hủy hóa đơn</h3>
+                            <p className="text-xs text-[#64748B]">Nhập lý do để xác nhận hủy</p>
                         </div>
                     </div>
 
@@ -37,17 +37,17 @@ export function CancelOrderDialog({ onConfirm, onClose, isLoading }: CancelOrder
                         onChange={(e) => setReason(e.target.value)}
                         placeholder="Lý do hủy hóa đơn (tối thiểu 10 ký tự)..."
                         rows={3}
-                        className="w-full border border-[#E0DCD4] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D32F2F] resize-none"
+                        className="w-full border border-[#E2E8F0] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D32F2F] resize-none"
                         autoFocus
                     />
-                    <p className="text-xs text-[#6B6B6B] mt-1">{reason.length}/10 ký tự tối thiểu</p>
+                    <p className="text-xs text-[#64748B] mt-1">{reason.length}/10 ký tự tối thiểu</p>
                 </div>
 
-                <div className="border-t border-[#E0DCD4] p-4 flex gap-3">
+                <div className="border-t border-[#E2E8F0] p-4 flex gap-3">
                     <button
                         onClick={onClose}
                         disabled={isLoading}
-                        className="flex-1 py-2.5 text-sm text-[#6B6B6B] border border-[#E0DCD4] rounded-xl hover:bg-[#F0EDE6] transition-colors"
+                        className="flex-1 py-2.5 text-sm text-[#64748B] border border-[#E2E8F0] rounded-xl hover:bg-[#EEF2F7] transition-colors"
                     >
                         Quay lại
                     </button>

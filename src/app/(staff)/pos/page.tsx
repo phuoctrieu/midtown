@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { useMenu } from '@/hooks/useMenu'
-import { useCart } from '@/hooks/useCart'
+import { useIsFetching, useIsMutating } from '@tanstack/react-query'
 import { useTables } from '@/hooks/useTables'
 import {
     useActiveOrders,
@@ -29,6 +29,7 @@ import type { Database } from '@/types/database'
 import { ShoppingCart, X } from 'lucide-react'
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from '@/components/ui/sheet'
 import { formatVND } from '@/lib/format'
+import { useCart } from '@/hooks/useCart'
 
 type MenuItem = Database['public']['Tables']['menu_items']['Row']
 
@@ -63,32 +64,52 @@ export default function POSPage() {
     const [billData, setBillData] = useState<any>(null)
     const [isCartOpen, setIsCartOpen] = useState(false)
 
-    // Keep local cart in sync with active orders (to reflect QR orders accepted)
+    const isFetchingActiveOrders = useIsFetching({ queryKey: ['active_orders'] }) > 0
+    const isMutatingActiveOrders = useIsMutating() > 0
+
+    // Track menuItemIds that are pending removal to prevent the sync effect from re-adding them
+    const pendingRemovesRef = useRef(new Set<string>())
+
+    // Keep local cart in sync with active orders (to reflect QR orders accepted by staff)
+    // IMPORTANT: Only ADD new items from DB — never remove items based on DB state,
+    // because optimistic removes would get re-added (race condition with stale cache).
     useEffect(() => {
         if (!cart.state.tableId || !cart.state.orderId) return
 
-        const currentOrder = activeOrders.find(o => o.id === cart.state.orderId)
-        if (currentOrder) {
-            // Re-sync local cart items with DB items
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const items = (currentOrder.order_items || []).map((oi: any) => ({
-                menuItemId: oi.menu_item_id,
-                name: oi.menu_items?.name || '',
-                price: oi.unit_price,
-                quantity: oi.quantity,
-                note: oi.note || '',
-                imageUrl: oi.menu_items?.image_url || null,
-                orderItemId: oi.id,
-            }))
+        // Skip sync if we have pending backend operations
+        if (isFetchingActiveOrders || isMutatingActiveOrders) return
 
+        const currentOrder = activeOrders.find(o => o.id === cart.state.orderId)
+        if (!currentOrder) return
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const dbItems = (currentOrder.order_items || []).map((oi: any) => ({
+            menuItemId: oi.menu_item_id,
+            name: oi.menu_items?.name || '',
+            price: oi.unit_price,
+            quantity: oi.quantity,
+            note: oi.note || '',
+            imageUrl: oi.menu_items?.image_url || null,
+            orderItemId: oi.id,
+        }))
+
+        const cartIds = new Set(cart.state.items.map(i => i.menuItemId))
+        const newItems = dbItems.filter(
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (i: any) => !cartIds.has(i.menuItemId) && !pendingRemovesRef.current.has(i.menuItemId)
+        )
+
+        // Only merge if DB has items that aren't in the local cart (e.g. accepted QR order)
+        if (newItems.length > 0) {
             cart.loadOrder(
                 currentOrder.id,
                 cart.state.tableId,
                 cart.state.tableName || 'Bàn',
-                items
+                [...cart.state.items, ...newItems]
             )
         }
-    }, [activeOrders, cart.state.tableId, cart.state.orderId, cart.state.tableName, cart.loadOrder])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [activeOrders, cart.state.orderId, isFetchingActiveOrders, isMutatingActiveOrders])
 
     // Filter menu items by category + search
     const filteredItems = useMemo(() => {
@@ -139,6 +160,7 @@ export default function POSPage() {
                 orderItemId: oi.id, // Track DB row id for updates
             }))
 
+            pendingRemovesRef.current.clear()
             cart.loadOrder(
                 order.id,
                 tableId,
@@ -170,6 +192,7 @@ export default function POSPage() {
                 staffId: profile.id,
             })
 
+            pendingRemovesRef.current.clear()
             cart.loadOrder(order.id, null, 'Mang về', [])
             setViewMode('menu')
             toast.success('Đã tạo đơn mang về')
@@ -191,7 +214,14 @@ export default function POSPage() {
             return
         }
 
-        // Table order — save to DB
+        // Table order: Optimitic update
+        cart.addItem({
+            menuItemId: item.id,
+            name: item.name,
+            price: item.price,
+            imageUrl: item.image_url,
+        })
+
         try {
             await addOrderItem.mutateAsync({
                 orderId: cart.state.orderId,
@@ -199,16 +229,9 @@ export default function POSPage() {
                 quantity: 1,
                 unitPrice: item.price,
             })
-
-            // Update local cart optimistically
-            cart.addItem({
-                menuItemId: item.id,
-                name: item.name,
-                price: item.price,
-                imageUrl: item.image_url,
-            })
         } catch (error) {
             toast.error('Lỗi thêm món: ' + (error as Error).message)
+            // Ideally we'd remove it on error, but a refetch will sync it later.
         }
     }
 
@@ -219,27 +242,17 @@ export default function POSPage() {
             return
         }
 
-        // Find the order_item in the active order
-        const activeOrder = activeOrders.find(o => o.id === cart.state.orderId)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const orderItem = (activeOrder as any)?.order_items?.find(
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (oi: any) => oi.menu_item_id === menuItemId
-        )
+        // Optimistic update
+        cart.updateQuantity(menuItemId, quantity)
 
-        if (orderItem) {
-            try {
-                await updateOrderItem.mutateAsync({
-                    orderItemId: orderItem.id,
-                    orderId: cart.state.orderId,
-                    quantity,
-                })
-                cart.updateQuantity(menuItemId, quantity)
-            } catch (error) {
-                toast.error('Lỗi cập nhật: ' + (error as Error).message)
-            }
-        } else {
-            cart.updateQuantity(menuItemId, quantity)
+        try {
+            await updateOrderItem.mutateAsync({
+                orderId: cart.state.orderId,
+                menuItemId,
+                quantity,
+            })
+        } catch (error) {
+            toast.error('Lỗi cập nhật: ' + (error as Error).message)
         }
     }
 
@@ -250,25 +263,21 @@ export default function POSPage() {
             return
         }
 
-        const activeOrder = activeOrders.find(o => o.id === cart.state.orderId)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const orderItem = (activeOrder as any)?.order_items?.find(
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (oi: any) => oi.menu_item_id === menuItemId
-        )
+        // Mark as pending removal so the sync effect won't re-add from stale DB data
+        pendingRemovesRef.current.add(menuItemId)
 
-        if (orderItem) {
-            try {
-                await removeOrderItem.mutateAsync({
-                    orderItemId: orderItem.id,
-                    orderId: cart.state.orderId,
-                })
-                cart.removeItem(menuItemId)
-            } catch (error) {
-                toast.error('Lỗi xóa món: ' + (error as Error).message)
-            }
-        } else {
-            cart.removeItem(menuItemId)
+        // Optimistic update
+        cart.removeItem(menuItemId)
+
+        try {
+            await removeOrderItem.mutateAsync({
+                orderId: cart.state.orderId,
+                menuItemId,
+            })
+        } catch (error) {
+            // Removal failed — allow sync to re-add this item
+            pendingRemovesRef.current.delete(menuItemId)
+            toast.error('Lỗi xóa món: ' + (error as Error).message)
         }
     }
 
@@ -373,18 +382,18 @@ export default function POSPage() {
             {/* Left: Menu Panel */}
             <div className="flex-1 flex flex-col overflow-hidden">
                 {/* Search + Tabs */}
-                <div className="px-4 pt-3 pb-2 space-y-2 bg-[#FAFAF8] border-b border-[#E0DCD4]">
-                    <div className="flex bg-[#E0DCD4]/30 rounded-lg p-1 w-fit mb-3">
+                <div className="px-4 pt-3 pb-2 space-y-2 bg-[#F8FAFC] border-b border-[#E2E8F0]">
+                    <div className="flex bg-[#E2E8F0]/30 rounded-lg p-1 w-fit mb-3">
                         <button
                             onClick={() => setViewMode('menu')}
-                            className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${viewMode === 'menu' ? 'bg-white text-[#1A1A1A] shadow-sm' : 'text-[#6B6B6B] hover:text-[#1A1A1A]'
+                            className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${viewMode === 'menu' ? 'bg-white text-[#0F172A] shadow-sm' : 'text-[#64748B] hover:text-[#0F172A]'
                                 }`}
                         >
                             Thực đơn
                         </button>
                         <button
                             onClick={() => setViewMode('tables')}
-                            className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${viewMode === 'tables' ? 'bg-white text-[#1A1A1A] shadow-sm' : 'text-[#6B6B6B] hover:text-[#1A1A1A]'
+                            className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${viewMode === 'tables' ? 'bg-white text-[#0F172A] shadow-sm' : 'text-[#64748B] hover:text-[#0F172A]'
                                 }`}
                         >
                             Sơ đồ bàn
@@ -398,7 +407,7 @@ export default function POSPage() {
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 placeholder="Tìm món..."
-                                className="w-full px-4 py-2 rounded-xl border border-[#E0DCD4] bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#D4553A]/30 focus:border-[#D4553A]"
+                                className="w-full px-4 py-2 rounded-xl border border-[#E2E8F0] bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#DC2626]/30 focus:border-[#DC2626]"
                             />
                             <CategoryTabs
                                 categories={categories}
@@ -410,14 +419,14 @@ export default function POSPage() {
                 </div>
 
                 {/* Content Area */}
-                <div className="flex-1 overflow-y-auto bg-[#FAFAF8] flex flex-col">
+                <div className="flex-1 overflow-y-auto bg-[#F8FAFC] flex flex-col">
                     <QRRequestsPanel />
                     {viewMode === 'menu' ? (
                         <div className="p-4">
                             {isLoading ? (
                                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                                     {[...Array(9)].map((_, i) => (
-                                        <div key={i} className="bg-white rounded-xl border border-[#E0DCD4] h-36 animate-pulse" />
+                                        <div key={i} className="bg-white rounded-xl border border-[#E2E8F0] h-36 animate-pulse" />
                                     ))}
                                 </div>
                             ) : (
@@ -470,10 +479,10 @@ export default function POSPage() {
             </div>
 
             {/* Mobile Cart Button */}
-            <div className="md:hidden fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-[#E0DCD4] z-20">
+            <div className="md:hidden fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-[#E2E8F0] z-20">
                 <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>
                     <SheetTrigger asChild>
-                        <button className="w-full bg-[#D4553A] text-white py-3 rounded-xl font-medium flex items-center justify-between px-4 shadow-lg">
+                        <button className="w-full bg-[#DC2626] text-white py-3 rounded-xl font-medium flex items-center justify-between px-4 shadow-lg">
                             <div className="flex items-center gap-2">
                                 <ShoppingCart className="w-5 h-5" />
                                 <span>{cart.state.items.length} món</span>
@@ -485,7 +494,7 @@ export default function POSPage() {
                         <SheetTitle className="sr-only">Giỏ hàng</SheetTitle>
                         <SheetDescription className="sr-only">Quản lý hóa đơn và thanh toán</SheetDescription>
                         <div className="absolute right-4 top-3 z-50">
-                            <button onClick={() => setIsCartOpen(false)} className="bg-[#E0DCD4] hover:bg-[#D4553A] hover:text-white transition-colors p-1.5 rounded-full text-[#6B6B6B]">
+                            <button onClick={() => setIsCartOpen(false)} className="bg-[#E2E8F0] hover:bg-[#DC2626] hover:text-white transition-colors p-1.5 rounded-full text-[#64748B]">
                                 <X className="w-5 h-5" />
                             </button>
                         </div>

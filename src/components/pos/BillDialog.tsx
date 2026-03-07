@@ -207,7 +207,7 @@ export function BillDialog({ data, onClose }: BillDialogProps) {
                     </button>
                     <button
                         onClick={handlePrint}
-                        className="flex-1 py-2.5 rounded-xl bg-[#1A1A1A] text-white text-sm font-semibold hover:bg-[#333] transition-colors flex items-center justify-center gap-2"
+                        className="flex-1 py-2.5 rounded-xl bg-[#0F172A] text-white text-sm font-semibold hover:bg-[#333] transition-colors flex items-center justify-center gap-2"
                     >
                         <Printer className="w-4 h-4" />
                         In Bill

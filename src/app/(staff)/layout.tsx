@@ -19,7 +19,7 @@ export default async function StaffLayout({
         .single()
 
     return (
-        <div className="min-h-screen bg-[#FAFAF8]">
+        <div className="min-h-screen bg-[#F8FAFC]">
             <StaffHeader
                 staffName={profile?.full_name || user.email || 'Nhân viên'}
                 isAdmin={profile?.role === 'admin'}
