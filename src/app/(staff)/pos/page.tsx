@@ -70,14 +70,23 @@ export default function POSPage() {
     // Track menuItemIds that are pending removal to prevent the sync effect from re-adding them
     const pendingRemovesRef = useRef(new Set<string>())
 
+    // Flag to block sync effect during payment/bill display
+    const isPayingRef = useRef(false)
+
     // Keep local cart in sync with active orders (to reflect QR orders accepted by staff)
-    // IMPORTANT: Only ADD new items from DB — never remove items based on DB state,
-    // because optimistic removes would get re-added (race condition with stale cache).
+    // IMPORTANT: Only ADD new items from DB — never remove or update existing items,
+    // because optimistic removes/updates would get reverted (race condition with stale cache).
+    // Uses mergeNewItems (additive-only) instead of loadOrder (full replace) to avoid
+    // overwriting local state with stale data.
     useEffect(() => {
         if (!cart.state.tableId || !cart.state.orderId) return
 
         // Skip sync if we have pending backend operations
         if (isFetchingActiveOrders || isMutatingActiveOrders) return
+
+        // Skip sync during payment flow or bill display — stale cache data could
+        // re-add items that the user already removed
+        if (isPayingRef.current || showBill) return
 
         const currentOrder = activeOrders.find(o => o.id === cart.state.orderId)
         if (!currentOrder) return
@@ -93,23 +102,20 @@ export default function POSPage() {
             orderItemId: oi.id,
         }))
 
-        const cartIds = new Set(cart.state.items.map(i => i.menuItemId))
+        // Filter out items pending removal AND items already in cart
         const newItems = dbItems.filter(
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (i: any) => !cartIds.has(i.menuItemId) && !pendingRemovesRef.current.has(i.menuItemId)
+            (i: any) => !pendingRemovesRef.current.has(i.menuItemId)
         )
 
-        // Only merge if DB has items that aren't in the local cart (e.g. accepted QR order)
+        // Additive-only merge: the reducer itself checks for duplicates.
+        // This is safe even with stale data because mergeNewItems never
+        // overwrites existing items — it only adds items not already in cart.
         if (newItems.length > 0) {
-            cart.loadOrder(
-                currentOrder.id,
-                cart.state.tableId,
-                cart.state.tableName || 'Bàn',
-                [...cart.state.items, ...newItems]
-            )
+            cart.mergeNewItems(newItems)
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [activeOrders, cart.state.orderId, isFetchingActiveOrders, isMutatingActiveOrders])
+    }, [activeOrders, cart.state.orderId, isFetchingActiveOrders, isMutatingActiveOrders, showBill])
 
     // Filter menu items by category + search
     const filteredItems = useMemo(() => {
@@ -203,6 +209,10 @@ export default function POSPage() {
 
     // Add item: save to DB immediately if we have an active order
     const handleAddItem = async (item: MenuItem) => {
+        // If this item was previously removed, clear from pendingRemoves
+        // so the sync effect can properly track it again
+        pendingRemovesRef.current.delete(item.id)
+
         if (!cart.state.orderId) {
             // Takeaway mode — just add to local cart
             cart.addItem({
@@ -214,7 +224,7 @@ export default function POSPage() {
             return
         }
 
-        // Table order: Optimitic update
+        // Table order: Optimistic update
         cart.addItem({
             menuItemId: item.id,
             name: item.name,
@@ -242,6 +252,11 @@ export default function POSPage() {
             return
         }
 
+        // When quantity reaches 0, mark as pending removal so sync effect won't re-add from stale DB data
+        if (quantity <= 0) {
+            pendingRemovesRef.current.add(menuItemId)
+        }
+
         // Optimistic update
         cart.updateQuantity(menuItemId, quantity)
 
@@ -252,6 +267,10 @@ export default function POSPage() {
                 quantity,
             })
         } catch (error) {
+            // If removal failed, allow sync to re-add this item
+            if (quantity <= 0) {
+                pendingRemovesRef.current.delete(menuItemId)
+            }
             toast.error('Lỗi cập nhật: ' + (error as Error).message)
         }
     }
@@ -292,15 +311,46 @@ export default function POSPage() {
             return
         }
 
+        // IMPORTANT: Snapshot bill data BEFORE the async checkout call.
+        // After the await, the sync effect could run and re-add removed items
+        // from stale activeOrders cache, contaminating the cart state.
+        // By snapshotting here, we guarantee the bill matches what the user sees.
+        const snapshotBillData = {
+            orderId: cart.state.orderId || `MANG_VE_${Math.floor(Date.now() / 1000)}`,
+            tableName: cart.state.tableName || 'Mang về',
+            staffName: profile.full_name || 'Thu ngân',
+            createdAt: new Date().toISOString(),
+            paymentMethod: method,
+            subtotal: cart.subtotal,
+            discountAmount: cart.discountAmount,
+            total: cart.total,
+            items: cart.state.items.map(i => ({
+                name: i.name,
+                quantity: i.quantity,
+                price: i.price,
+            }))
+        }
+
+        // Block the sync effect from modifying cart during checkout
+        isPayingRef.current = true
+
         try {
             if (cart.state.orderId) {
-                // Table order — checkout existing order
+                // Table order — checkout existing order.
+                // Pass finalItems so the mutation can reconcile order_items
+                // in the DB with what the user actually sees in the cart.
+                // This prevents stale rows from appearing in Sales History.
                 await checkoutOrder.mutateAsync({
                     orderId: cart.state.orderId,
                     paymentMethod: method,
                     discountType: cart.state.discountType,
                     discountValue: cart.state.discountValue,
                     note: cart.state.note,
+                    finalItems: cart.state.items.map(i => ({
+                        menuItemId: i.menuItemId,
+                        quantity: i.quantity,
+                        unitPrice: i.price,
+                    })),
                 })
             } else {
                 // Takeaway — create + checkout atomically
@@ -314,29 +364,14 @@ export default function POSPage() {
                 })
             }
 
-            // Capture data for receipt before clearing cart
-            const currentBillData = {
-                orderId: cart.state.orderId || `MANG_VE_${Math.floor(Date.now() / 1000)}`,
-                tableName: cart.state.tableName || 'Mang về',
-                staffName: profile.full_name || 'Thu ngân',
-                createdAt: new Date().toISOString(),
-                paymentMethod: method,
-                subtotal: cart.subtotal,
-                discountAmount: cart.discountAmount,
-                total: cart.total,
-                items: cart.state.items.map(i => ({
-                    name: i.name,
-                    quantity: i.quantity,
-                    price: i.price,
-                }))
-            }
-
-            setBillData(currentBillData)
+            // Use the pre-checkout snapshot for the receipt
+            setBillData(snapshotBillData)
             setShowBill(true)
             toast.success('Thanh toán thành công!')
             // Note: We don't clearCart() or setViewMode('tables') here.
             // That happens when they close the BillModal.
         } catch (error) {
+            isPayingRef.current = false
             toast.error('Lỗi thanh toán: ' + (error as Error).message)
         }
     }
@@ -548,6 +583,8 @@ export default function POSPage() {
                 isOpen={showBill}
                 onClose={() => {
                     setShowBill(false)
+                    isPayingRef.current = false
+                    pendingRemovesRef.current.clear()
                     cart.clearCart()
                     setViewMode('tables')
                 }}

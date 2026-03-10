@@ -61,7 +61,8 @@ export default function OrdersPage() {
         enabled: !!selectedOrder,
     })
 
-    // Prepare data for the BillModal
+    // Prepare data for the BillModal — filter out any items with quantity <= 0
+    // as a defensive measure (they should have been deleted during checkout reconciliation)
     const billData = selectedOrderDetail ? {
         orderId: selectedOrderDetail.id,
         tableName: selectedOrderDetail.tables ? (selectedOrderDetail.tables.name || `Bàn ${selectedOrderDetail.tables.table_number}`) : 'Mang về',
@@ -72,11 +73,15 @@ export default function OrdersPage() {
         discountAmount: selectedOrderDetail.discount_amount,
         total: selectedOrderDetail.total,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        items: (selectedOrderDetail.order_items || []).map((item: any) => ({
-            name: item.menu_items?.name || 'Món',
-            quantity: item.quantity,
-            price: item.unit_price,
-        }))
+        items: (selectedOrderDetail.order_items || [])
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            .filter((item: any) => item.quantity > 0)
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            .map((item: any) => ({
+                name: item.menu_items?.name || 'Món',
+                quantity: item.quantity,
+                price: item.unit_price,
+            }))
     } : null
 
     return (
@@ -237,7 +242,9 @@ export default function OrdersPage() {
                             <div>
                                 <h3 className="text-sm font-semibold text-[#0F172A] mb-2">Chi tiết món</h3>
                                 <div className="space-y-2">
-                                    {selectedOrderDetail.order_items?.map((item: { id: string; quantity: number; unit_price: number; note: string | null; menu_items?: { name: string } }) => (
+                                    {selectedOrderDetail.order_items
+                                        ?.filter((item: { quantity: number }) => item.quantity > 0)
+                                        .map((item: { id: string; quantity: number; unit_price: number; note: string | null; menu_items?: { name: string } }) => (
                                         <div key={item.id} className="flex justify-between text-sm">
                                             <div>
                                                 <span className="font-medium">{item.menu_items?.name}</span>

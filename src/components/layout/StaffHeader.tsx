@@ -1,6 +1,6 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { UtensilsCrossed, LogOut, Shield } from 'lucide-react'
@@ -12,6 +12,7 @@ interface StaffHeaderProps {
 
 export function StaffHeader({ staffName, isAdmin }: StaffHeaderProps) {
     const router = useRouter()
+    const pathname = usePathname()
 
     const handleLogout = async () => {
         const supabase = createClient()
@@ -35,7 +36,7 @@ export function StaffHeader({ staffName, isAdmin }: StaffHeaderProps) {
                 <nav className="flex items-center gap-1 sm:gap-2">
                     <button
                         onClick={() => router.push('/pos')}
-                        className={`whitespace-nowrap px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${typeof window !== 'undefined' && window.location.pathname === '/pos'
+                        className={`whitespace-nowrap px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${pathname === '/pos'
                             ? 'bg-white/15 text-white'
                             : 'text-white/60 hover:bg-white/10 hover:text-white'
                             }`}
@@ -44,7 +45,7 @@ export function StaffHeader({ staffName, isAdmin }: StaffHeaderProps) {
                     </button>
                     <button
                         onClick={() => router.push('/orders')}
-                        className={`whitespace-nowrap px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${typeof window !== 'undefined' && window.location.pathname.startsWith('/orders')
+                        className={`whitespace-nowrap px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${pathname.startsWith('/orders')
                             ? 'bg-white/15 text-white'
                             : 'text-white/60 hover:bg-white/10 hover:text-white'
                             }`}
@@ -53,7 +54,7 @@ export function StaffHeader({ staffName, isAdmin }: StaffHeaderProps) {
                     </button>
                     <button
                         onClick={() => router.push('/cashbook')}
-                        className={`whitespace-nowrap px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${typeof window !== 'undefined' && window.location.pathname.startsWith('/cashbook')
+                        className={`whitespace-nowrap px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${pathname.startsWith('/cashbook')
                             ? 'bg-white/15 text-white'
                             : 'text-white/60 hover:bg-white/10 hover:text-white'
                             }`}

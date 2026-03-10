@@ -13,6 +13,7 @@ type CartAction =
     | { type: 'SET_TABLE'; tableId: string | null; tableName: string | null }
     | { type: 'SET_ORDER_NOTE'; note: string }
     | { type: 'LOAD_ORDER'; orderId: string; tableId: string | null; tableName: string; items: CartItem[] }
+    | { type: 'MERGE_NEW_ITEMS'; items: CartItem[] }
     | { type: 'CLEAR_CART' }
 
 const initialState: CartState = {
@@ -74,6 +75,13 @@ function cartReducer(state: CartState, action: CartAction): CartState {
                 tableName: action.tableName,
                 items: action.items,
             }
+        case 'MERGE_NEW_ITEMS': {
+            // Additive-only merge: add items not already in cart, never touch existing items
+            const existingIds = new Set(state.items.map(i => i.menuItemId))
+            const truly_new = action.items.filter(i => !existingIds.has(i.menuItemId))
+            if (truly_new.length === 0) return state
+            return { ...state, items: [...state.items, ...truly_new] }
+        }
         case 'CLEAR_CART':
             return { ...initialState }
         default:
@@ -120,6 +128,10 @@ export function useCart() {
         dispatch({ type: 'LOAD_ORDER', orderId, tableId, tableName, items })
     }, [])
 
+    const mergeNewItems = useCallback((items: CartItem[]) => {
+        dispatch({ type: 'MERGE_NEW_ITEMS', items })
+    }, [])
+
     const clearCart = useCallback(() => {
         dispatch({ type: 'CLEAR_CART' })
     }, [])
@@ -138,6 +150,7 @@ export function useCart() {
         setTable,
         setOrderNote,
         loadOrder,
+        mergeNewItems,
         clearCart,
     }
 }

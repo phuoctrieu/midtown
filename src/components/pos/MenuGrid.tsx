@@ -24,7 +24,7 @@ export function MenuGrid({ items, onAddItem, cartItemIds }: MenuGridProps) {
     }
 
     return (
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3">
             {items.map((item) => {
                 const inCart = cartItemIds.has(item.id)
                 return (
@@ -32,12 +32,12 @@ export function MenuGrid({ items, onAddItem, cartItemIds }: MenuGridProps) {
                         key={item.id}
                         onClick={() => onAddItem(item)}
                         className={`menu-card tap-highlight bg-white rounded-xl border text-left overflow-hidden transition-all ${inCart
-                                ? 'border-[#DC2626] ring-2 ring-[#DC2626]/20'
-                                : 'border-[#E2E8F0] hover:border-[#DC2626]/50'
+                            ? 'border-[#DC2626] ring-2 ring-[#DC2626]/20'
+                            : 'border-[#E2E8F0] hover:border-[#DC2626]/50'
                             }`}
                     >
                         {/* Image */}
-                        <div className="relative h-24 bg-[#EEF2F7] overflow-hidden">
+                        <div className="relative h-16 sm:h-20 bg-[#EEF2F7] overflow-hidden">
                             {item.image_url ? (
                                 <Image
                                     src={item.image_url}
@@ -48,22 +48,22 @@ export function MenuGrid({ items, onAddItem, cartItemIds }: MenuGridProps) {
                                 />
                             ) : (
                                 <div className="absolute inset-0 flex items-center justify-center">
-                                    <svg className="w-10 h-10 text-[#DC2626]/30" fill="currentColor" viewBox="0 0 24 24">
+                                    <svg className="w-8 h-8 text-[#DC2626]/30" fill="currentColor" viewBox="0 0 24 24">
                                         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" />
                                     </svg>
                                 </div>
                             )}
                             {inCart && (
-                                <div className="absolute top-1.5 right-1.5 w-5 h-5 bg-[#DC2626] rounded-full flex items-center justify-center">
-                                    <Plus className="w-3 h-3 text-white" />
+                                <div className="absolute top-1 right-1 w-5 h-5 bg-[#DC2626] rounded-full flex items-center justify-center shadow-sm">
+                                    <Plus className="w-3.5 h-3.5 text-white" />
                                 </div>
                             )}
                         </div>
 
                         {/* Info */}
-                        <div className="p-2.5">
-                            <p className="text-sm font-medium text-[#0F172A] line-clamp-2 leading-tight mb-1">{item.name}</p>
-                            <p className="price-text text-[#DC2626] text-sm">{formatNumber(item.price)}₫</p>
+                        <div className="p-2 sm:p-2.5">
+                            <p className="text-xs sm:text-sm font-medium text-[#0F172A] line-clamp-2 leading-tight mb-1">{item.name}</p>
+                            <p className="price-text text-[#DC2626] text-xs sm:text-sm font-semibold">{formatNumber(item.price)}₫</p>
                         </div>
                     </button>
                 )

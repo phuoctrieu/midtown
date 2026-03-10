@@ -419,6 +419,7 @@ export type Database = {
             Args: {
               p_discount_type?: string
               p_discount_value?: number
+              p_final_items?: Json
               p_order_id: string
               p_payment_method: Database["public"]["Enums"]["payment_method"]
             }
@@ -428,6 +429,7 @@ export type Database = {
             Args: {
               p_discount_type?: string
               p_discount_value?: number
+              p_final_items?: Json
               p_order_id: string
               p_payment_method: string
             }

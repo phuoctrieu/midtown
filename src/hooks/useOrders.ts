@@ -170,7 +170,8 @@ export function useAddOrderItem() {
                 return { orderItemId: inserted.id }
             }
         },
-        onSuccess: () => {
+        onSuccess: async () => {
+            await queryClient.cancelQueries({ queryKey: ['active_orders'] })
             queryClient.invalidateQueries({ queryKey: ['active_orders'] })
         },
     })
@@ -211,7 +212,10 @@ export function useUpdateOrderItem() {
 
             await recalculateOrderTotal(supabase, orderId)
         },
-        onSuccess: (_, { orderId, menuItemId, quantity }) => {
+        onSuccess: async (_, { orderId, menuItemId, quantity }) => {
+            // Cancel any in-flight fetches FIRST so they don't overwrite our optimistic update
+            await queryClient.cancelQueries({ queryKey: ['active_orders'] })
+
             // Update cache immediately so the sync effect doesn't see stale data
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             queryClient.setQueryData<any[]>(['active_orders'], (old) => {
@@ -230,6 +234,7 @@ export function useUpdateOrderItem() {
                     }
                 })
             })
+            // Refetch fresh data from DB (safe now — mutation already committed, no stale in-flight fetches)
             queryClient.invalidateQueries({ queryKey: ['active_orders'] })
         },
     })
@@ -259,7 +264,10 @@ export function useRemoveOrderItem() {
 
             await recalculateOrderTotal(supabase, orderId)
         },
-        onSuccess: (_, { orderId, menuItemId }) => {
+        onSuccess: async (_, { orderId, menuItemId }) => {
+            // Cancel any in-flight fetches FIRST so they don't overwrite our optimistic update
+            await queryClient.cancelQueries({ queryKey: ['active_orders'] })
+
             // Update cache immediately so the sync effect doesn't see stale data
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             queryClient.setQueryData<any[]>(['active_orders'], (old) => {
@@ -273,6 +281,7 @@ export function useRemoveOrderItem() {
                     }
                 })
             })
+            // Refetch fresh data from DB (safe now — mutation already committed, no stale in-flight fetches)
             queryClient.invalidateQueries({ queryKey: ['active_orders'] })
         },
     })
@@ -302,7 +311,12 @@ export function useUpdateOrderItemNote() {
 }
 
 /**
- * Checkout an order: set payment method and mark as completed
+ * Checkout an order: set payment method and mark as completed.
+ *
+ * Accepts the final cart items so the RPC can atomically reconcile
+ * order_items in the DB within a single transaction. This prevents
+ * stale rows (from in-flight remove/update mutations) from appearing
+ * in Sales History.
  */
 export function useCheckoutOrder() {
     const supabase = createClient()
@@ -315,23 +329,54 @@ export function useCheckoutOrder() {
             discountType,
             discountValue,
             note,
+            finalItems,
         }: {
             orderId: string
             paymentMethod: 'cash' | 'transfer'
             discountType?: 'percent' | 'amount' | null
             discountValue?: number
             note?: string
+            finalItems?: { menuItemId: string; quantity: number; unitPrice: number }[]
         }) => {
-            // Try using RPC if available, otherwise update manually
+            // Pass finalItems as JSONB to the RPC so reconciliation + checkout
+            // happen in a single atomic PostgreSQL transaction.
             const { error: rpcError } = await supabase.rpc('checkout_order', {
                 p_order_id: orderId,
                 p_payment_method: paymentMethod,
                 p_discount_value: discountValue || 0,
                 p_discount_type: discountType || 'amount',
+                p_final_items: finalItems ? finalItems : null,
             })
 
             if (rpcError) {
-                // Fallback: manual update
+                // Fallback: client-side reconciliation + manual update
+                // (only if the RPC is unavailable, e.g. migration not applied yet)
+                console.warn('checkout_order RPC failed, using fallback:', rpcError.message)
+
+                if (finalItems) {
+                    const finalMenuItemIds = finalItems.map(i => i.menuItemId)
+
+                    // Delete stale order_items
+                    if (finalMenuItemIds.length > 0) {
+                        await supabase
+                            .from('order_items')
+                            .delete()
+                            .eq('order_id', orderId)
+                            .not('menu_item_id', 'in', `(${finalMenuItemIds.join(',')})`)
+                    } else {
+                        await supabase.from('order_items').delete().eq('order_id', orderId)
+                    }
+
+                    // Update quantities
+                    for (const item of finalItems) {
+                        await supabase
+                            .from('order_items')
+                            .update({ quantity: item.quantity, unit_price: item.unitPrice })
+                            .eq('order_id', orderId)
+                            .eq('menu_item_id', item.menuItemId)
+                    }
+                }
+
                 await recalculateOrderTotal(supabase, orderId, discountType, discountValue)
 
                 const { error } = await supabase
@@ -349,6 +394,7 @@ export function useCheckoutOrder() {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['active_orders'] })
             queryClient.invalidateQueries({ queryKey: ['orders'] })
+            queryClient.invalidateQueries({ queryKey: ['admin_orders'] })
         },
     })
 }
@@ -385,6 +431,7 @@ export function useCancelOrder() {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['active_orders'] })
             queryClient.invalidateQueries({ queryKey: ['orders'] })
+            queryClient.invalidateQueries({ queryKey: ['admin_orders'] })
         },
     })
 }
@@ -510,6 +557,7 @@ export function useCreateTakeawayOrder() {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['orders'] })
             queryClient.invalidateQueries({ queryKey: ['active_orders'] })
+            queryClient.invalidateQueries({ queryKey: ['admin_orders'] })
         },
     })
 }
