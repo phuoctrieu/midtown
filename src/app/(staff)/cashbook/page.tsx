@@ -96,7 +96,8 @@ export default function StaffCashbookPage() {
             const amount = parseInt(form.amount.replace(/\D/g, ''), 10)
             if (!amount || amount <= 0) throw new Error('Số tiền không hợp lệ')
             const now = new Date()
-            const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:00`
+            const vnTime = new Intl.DateTimeFormat('vi-VN', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Ho_Chi_Minh' }).format(now)
+            const timeStr = `${vnTime}:00`
             const { error } = await supabase.from('cash_transactions').insert({
                 date: form.date,
                 time: timeStr,
